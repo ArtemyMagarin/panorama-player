@@ -10,7 +10,7 @@ import {
 describe('mat4.identity', () => {
   test('produces identity matrix', () => {
     const m = identity();
-    const expected = [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1];
+    const expected = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
     expect(Array.from(m)).toEqual(expected);
   });
 });

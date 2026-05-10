@@ -38,11 +38,11 @@ function buildIHDR(w, h) {
   const b = Buffer.alloc(13);
   b.writeUInt32BE(w, 0);
   b.writeUInt32BE(h, 4);
-  b[8] = 8;        // bit depth
-  b[9] = 2;        // color type RGB
-  b[10] = 0;       // compression
-  b[11] = 0;       // filter
-  b[12] = 0;       // interlace
+  b[8] = 8; // bit depth
+  b[9] = 2; // color type RGB
+  b[10] = 0; // compression
+  b[11] = 0; // filter
+  b[12] = 0; // interlace
   return b;
 }
 
@@ -52,14 +52,40 @@ function hsv2rgb(h, s, v) {
   const p = v * (1 - s);
   const q = v * (1 - f * s);
   const t = v * (1 - (1 - f) * s);
-  let r = 0, g = 0, b = 0;
+  let r = 0,
+    g = 0,
+    b = 0;
   switch (i % 6) {
-    case 0: r = v; g = t; b = p; break;
-    case 1: r = q; g = v; b = p; break;
-    case 2: r = p; g = v; b = t; break;
-    case 3: r = p; g = q; b = v; break;
-    case 4: r = t; g = p; b = v; break;
-    case 5: r = v; g = p; b = q; break;
+    case 0:
+      r = v;
+      g = t;
+      b = p;
+      break;
+    case 1:
+      r = q;
+      g = v;
+      b = p;
+      break;
+    case 2:
+      r = p;
+      g = v;
+      b = t;
+      break;
+    case 3:
+      r = p;
+      g = q;
+      b = v;
+      break;
+    case 4:
+      r = t;
+      g = p;
+      b = v;
+      break;
+    case 5:
+      r = v;
+      g = p;
+      b = q;
+      break;
   }
   return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
 }
@@ -84,12 +110,16 @@ function buildPixels(w, h) {
     if (y % 32 === 0 || y === h - 1) {
       for (let x = 0; x < w; x++) {
         const o = rowStart + 1 + x * 3;
-        buf[o] = 0; buf[o + 1] = 0; buf[o + 2] = 0;
+        buf[o] = 0;
+        buf[o + 1] = 0;
+        buf[o + 2] = 0;
       }
     }
     for (let x = 0; x < w; x += 32) {
       const o = rowStart + 1 + x * 3;
-      buf[o] = 0; buf[o + 1] = 0; buf[o + 2] = 0;
+      buf[o] = 0;
+      buf[o + 1] = 0;
+      buf[o + 2] = 0;
     }
   }
   return buf;

@@ -1,12 +1,7 @@
 import { PointerInput } from './input/PointerInput.js';
 import { WheelInput } from './input/WheelInput.js';
 import { Renderer } from './renderer/Renderer.js';
-import {
-  type PanoramaOptions,
-  type ResolvedOptions,
-  type View,
-  resolveOptions,
-} from './types.js';
+import { type PanoramaOptions, type ResolvedOptions, type View, resolveOptions } from './types.js';
 import { clamp, wrapDeg } from './utils/clamp.js';
 import { loadImage } from './utils/loadImage.js';
 import { acquireStyles, releaseStyles } from './utils/styles.js';

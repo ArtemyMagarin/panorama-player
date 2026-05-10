@@ -5,8 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
     <title>panorama-player • single</title>
     <style>
-      html, body { margin: 0; padding: 0; height: 100%; background: #111; }
-      #host { width: 100vw; height: 100vh; }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        background: #111;
+      }
+      #host {
+        width: 100vw;
+        height: 100vh;
+      }
     </style>
   </head>
   <body>
@@ -19,11 +28,14 @@
       });
       player.mount(host);
       window.__pano = player;
-      window.__panoReady = player.loadImage('/e2e/fixtures/pano.png').then(() => {
-        window.__panoLoaded = true;
-      }).catch((err) => {
-        window.__panoError = String(err);
-      });
+      window.__panoReady = player
+        .loadImage('/e2e/fixtures/pano.png')
+        .then(() => {
+          window.__panoLoaded = true;
+        })
+        .catch((err) => {
+          window.__panoError = String(err);
+        });
     </script>
   </body>
 </html>

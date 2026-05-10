@@ -5,9 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
     <title>panorama-player • multi</title>
     <style>
-      html, body { margin: 0; padding: 0; height: 100%; background: #111; }
-      .row { display: flex; height: 100vh; }
-      .pane { flex: 1; height: 100%; }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        background: #111;
+      }
+      .row {
+        display: flex;
+        height: 100vh;
+      }
+      .pane {
+        flex: 1;
+        height: 100%;
+      }
     </style>
   </head>
   <body>
@@ -25,11 +37,13 @@
       window.__panoReady = Promise.all([
         a.loadImage('/e2e/fixtures/pano.png'),
         b.loadImage('/e2e/fixtures/pano.png'),
-      ]).then(() => {
-        window.__panoLoaded = true;
-      }).catch((err) => {
-        window.__panoError = String(err);
-      });
+      ])
+        .then(() => {
+          window.__panoLoaded = true;
+        })
+        .catch((err) => {
+          window.__panoError = String(err);
+        });
     </script>
   </body>
 </html>

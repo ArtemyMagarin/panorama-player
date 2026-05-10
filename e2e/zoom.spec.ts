@@ -35,8 +35,10 @@ test.describe('zoom', () => {
   });
 
   test('pinch via dispatched pointer events changes FOV', async ({ page, browserName }) => {
-    test.skip(browserName === 'chromium' && !test.info().project.name.includes('mobile'),
-      'pinch requires touch points; covered by mobile project');
+    test.skip(
+      browserName === 'chromium' && !test.info().project.name.includes('mobile'),
+      'pinch requires touch points; covered by mobile project',
+    );
 
     const before = await page.evaluate(() => (window as any).__pano.getView());
 

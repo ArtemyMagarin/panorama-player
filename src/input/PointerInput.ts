@@ -57,8 +57,7 @@ export class PointerInput {
       // ignore — capture may not exist for synthetic events
     }
     this.pointers.delete(e.pointerId);
-    this.lastPinchDistance =
-      this.pointers.size === 2 ? this.measurePinchDistance() : 0;
+    this.lastPinchDistance = this.pointers.size === 2 ? this.measurePinchDistance() : 0;
   };
 
   constructor(element: HTMLElement, callbacks: PointerInputCallbacks) {

@@ -22,6 +22,8 @@
     "size": "pnpm build && size-limit",
     "typecheck": "tsc --noEmit",
     "test": "jest",
+    "format": "prettier --write \"**/*.{ts,tsx,js,mjs,cjs,json,md,html}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,mjs,cjs,json,md,html}\"",
     "test:e2e": "pnpm build && pnpm e2e:fixture && playwright test",
     "e2e:install": "playwright install --with-deps",
     "e2e:fixture": "node e2e/scripts/generate-fixture.mjs",
@@ -43,6 +45,7 @@
     "@types/node": "^20.14.0",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
+    "prettier": "^3.8.3",
     "size-limit": "^12.1.0",
     "ts-jest": "^29.2.0",
     "typescript": "^5.5.0"

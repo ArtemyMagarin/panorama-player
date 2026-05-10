@@ -30,27 +30,27 @@ player.destroy();
 
 ## API
 
-| Method | Description |
-| --- | --- |
-| `new PanoramaPlayer(options?)` | Construct an unmounted player. |
-| `mount(container)` | Insert canvas into `container`, attach input listeners, start render loop. |
-| `loadImage(src)` | Load `string \| HTMLImageElement` and upload as the panorama texture. |
-| `setView({ yaw?, pitch?, fov? })` | Imperatively set the view; values are clamped/wrapped. |
-| `getView()` | Returns current `{ yaw, pitch, fov }` (degrees). |
-| `configure(partial)` | Update options at runtime; constraints reapplied. |
-| `destroy()` | Detach listeners, dispose WebGL resources, remove canvas. |
+| Method                            | Description                                                                |
+| --------------------------------- | -------------------------------------------------------------------------- |
+| `new PanoramaPlayer(options?)`    | Construct an unmounted player.                                             |
+| `mount(container)`                | Insert canvas into `container`, attach input listeners, start render loop. |
+| `loadImage(src)`                  | Load `string \| HTMLImageElement` and upload as the panorama texture.      |
+| `setView({ yaw?, pitch?, fov? })` | Imperatively set the view; values are clamped/wrapped.                     |
+| `getView()`                       | Returns current `{ yaw, pitch, fov }` (degrees).                           |
+| `configure(partial)`              | Update options at runtime; constraints reapplied.                          |
+| `destroy()`                       | Detach listeners, dispose WebGL resources, remove canvas.                  |
 
 ### Options
 
 ```ts
 interface PanoramaOptions {
   initialView?: { yaw?: number; pitch?: number; fov?: number };
-  fovRange?: [number, number];     // default [30, 100]
-  pitchRange?: [number, number];   // default [-89, 89]
-  dragSpeed?: number;              // default 0.25
-  zoomSpeed?: number;              // default 0.05 (wheel)
-  pinchSpeed?: number;             // default 0.5
-  devicePixelRatio?: number;       // default min(window.devicePixelRatio, 2)
+  fovRange?: [number, number]; // default [30, 100]
+  pitchRange?: [number, number]; // default [-89, 89]
+  dragSpeed?: number; // default 0.25
+  zoomSpeed?: number; // default 0.05 (wheel)
+  pinchSpeed?: number; // default 0.5
+  devicePixelRatio?: number; // default min(window.devicePixelRatio, 2)
 }
 ```
 

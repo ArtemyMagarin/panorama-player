@@ -31,10 +31,7 @@ export const DEFAULTS: ResolvedOptions = {
   dragSpeed: 0.25,
   zoomSpeed: 0.05,
   pinchSpeed: 0.5,
-  devicePixelRatio:
-    typeof window !== 'undefined'
-      ? Math.min(window.devicePixelRatio ?? 1, 2)
-      : 1,
+  devicePixelRatio: typeof window !== 'undefined' ? Math.min(window.devicePixelRatio ?? 1, 2) : 1,
 };
 
 export function resolveOptions(opts?: PanoramaOptions): ResolvedOptions {

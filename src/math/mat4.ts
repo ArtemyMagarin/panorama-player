@@ -5,10 +5,22 @@ export function create(): Mat4 {
 }
 
 export function identity(out: Mat4 = create()): Mat4 {
-  out[0] = 1; out[1] = 0; out[2] = 0; out[3] = 0;
-  out[4] = 0; out[5] = 1; out[6] = 0; out[7] = 0;
-  out[8] = 0; out[9] = 0; out[10] = 1; out[11] = 0;
-  out[12] = 0; out[13] = 0; out[14] = 0; out[15] = 1;
+  out[0] = 1;
+  out[1] = 0;
+  out[2] = 0;
+  out[3] = 0;
+  out[4] = 0;
+  out[5] = 1;
+  out[6] = 0;
+  out[7] = 0;
+  out[8] = 0;
+  out[9] = 0;
+  out[10] = 1;
+  out[11] = 0;
+  out[12] = 0;
+  out[13] = 0;
+  out[14] = 0;
+  out[15] = 1;
   return out;
 }
 
@@ -21,38 +33,86 @@ export function perspective(
 ): Mat4 {
   const f = 1 / Math.tan(fovYRad / 2);
   const nf = 1 / (near - far);
-  out[0] = f / aspect; out[1] = 0; out[2] = 0; out[3] = 0;
-  out[4] = 0; out[5] = f; out[6] = 0; out[7] = 0;
-  out[8] = 0; out[9] = 0; out[10] = (far + near) * nf; out[11] = -1;
-  out[12] = 0; out[13] = 0; out[14] = 2 * far * near * nf; out[15] = 0;
+  out[0] = f / aspect;
+  out[1] = 0;
+  out[2] = 0;
+  out[3] = 0;
+  out[4] = 0;
+  out[5] = f;
+  out[6] = 0;
+  out[7] = 0;
+  out[8] = 0;
+  out[9] = 0;
+  out[10] = (far + near) * nf;
+  out[11] = -1;
+  out[12] = 0;
+  out[13] = 0;
+  out[14] = 2 * far * near * nf;
+  out[15] = 0;
   return out;
 }
 
 export function rotationY(angleRad: number, out: Mat4 = create()): Mat4 {
   const c = Math.cos(angleRad);
   const s = Math.sin(angleRad);
-  out[0] = c; out[1] = 0; out[2] = -s; out[3] = 0;
-  out[4] = 0; out[5] = 1; out[6] = 0; out[7] = 0;
-  out[8] = s; out[9] = 0; out[10] = c; out[11] = 0;
-  out[12] = 0; out[13] = 0; out[14] = 0; out[15] = 1;
+  out[0] = c;
+  out[1] = 0;
+  out[2] = -s;
+  out[3] = 0;
+  out[4] = 0;
+  out[5] = 1;
+  out[6] = 0;
+  out[7] = 0;
+  out[8] = s;
+  out[9] = 0;
+  out[10] = c;
+  out[11] = 0;
+  out[12] = 0;
+  out[13] = 0;
+  out[14] = 0;
+  out[15] = 1;
   return out;
 }
 
 export function rotationX(angleRad: number, out: Mat4 = create()): Mat4 {
   const c = Math.cos(angleRad);
   const s = Math.sin(angleRad);
-  out[0] = 1; out[1] = 0; out[2] = 0; out[3] = 0;
-  out[4] = 0; out[5] = c; out[6] = s; out[7] = 0;
-  out[8] = 0; out[9] = -s; out[10] = c; out[11] = 0;
-  out[12] = 0; out[13] = 0; out[14] = 0; out[15] = 1;
+  out[0] = 1;
+  out[1] = 0;
+  out[2] = 0;
+  out[3] = 0;
+  out[4] = 0;
+  out[5] = c;
+  out[6] = s;
+  out[7] = 0;
+  out[8] = 0;
+  out[9] = -s;
+  out[10] = c;
+  out[11] = 0;
+  out[12] = 0;
+  out[13] = 0;
+  out[14] = 0;
+  out[15] = 1;
   return out;
 }
 
 export function multiply(a: Mat4, b: Mat4, out: Mat4 = create()): Mat4 {
-  const a00 = a[0]!, a01 = a[1]!, a02 = a[2]!, a03 = a[3]!;
-  const a10 = a[4]!, a11 = a[5]!, a12 = a[6]!, a13 = a[7]!;
-  const a20 = a[8]!, a21 = a[9]!, a22 = a[10]!, a23 = a[11]!;
-  const a30 = a[12]!, a31 = a[13]!, a32 = a[14]!, a33 = a[15]!;
+  const a00 = a[0]!,
+    a01 = a[1]!,
+    a02 = a[2]!,
+    a03 = a[3]!;
+  const a10 = a[4]!,
+    a11 = a[5]!,
+    a12 = a[6]!,
+    a13 = a[7]!;
+  const a20 = a[8]!,
+    a21 = a[9]!,
+    a22 = a[10]!,
+    a23 = a[11]!;
+  const a30 = a[12]!,
+    a31 = a[13]!,
+    a32 = a[14]!,
+    a33 = a[15]!;
 
   for (let i = 0; i < 4; i++) {
     const b0 = b[i * 4]!;
@@ -67,7 +127,12 @@ export function multiply(a: Mat4, b: Mat4, out: Mat4 = create()): Mat4 {
   return out;
 }
 
-export function transformVec3(m: Mat4, x: number, y: number, z: number): [number, number, number, number] {
+export function transformVec3(
+  m: Mat4,
+  x: number,
+  y: number,
+  z: number,
+): [number, number, number, number] {
   const rx = m[0]! * x + m[4]! * y + m[8]! * z + m[12]!;
   const ry = m[1]! * x + m[5]! * y + m[9]! * z + m[13]!;
   const rz = m[2]! * x + m[6]! * y + m[10]! * z + m[14]!;
