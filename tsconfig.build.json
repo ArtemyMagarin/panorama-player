@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "module": "ES2020",
+    "moduleResolution": "Bundler",
+    "types": []
+  },
+  "include": ["src"],
+  "exclude": ["tests", "e2e", "dist", "node_modules"]
+}
