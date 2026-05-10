@@ -11,6 +11,7 @@ test.describe('zoom', () => {
 
     const canvas = page.locator('canvas');
     await canvas.hover();
+    await page.keyboard.down('Control');
     await page.mouse.wheel(0, -200);
     const mid = await page.evaluate(() => (window as any).__pano.getView());
     expect(mid.fov).toBeLessThan(before.fov);
@@ -18,6 +19,7 @@ test.describe('zoom', () => {
     for (let i = 0; i < 30; i++) {
       await page.mouse.wheel(0, -200);
     }
+    await page.keyboard.up('Control');
     const after = await page.evaluate(() => (window as any).__pano.getView());
     expect(after.fov).toBeGreaterThanOrEqual(30);
   });
@@ -25,10 +27,12 @@ test.describe('zoom', () => {
   test('wheel up zooms out and clamps at fovRange[1]', async ({ page }) => {
     const canvas = page.locator('canvas');
     await canvas.hover();
+    await page.keyboard.down('Control');
 
     for (let i = 0; i < 30; i++) {
       await page.mouse.wheel(0, 200);
     }
+    await page.keyboard.up('Control');
     const after = await page.evaluate(() => (window as any).__pano.getView());
     expect(after.fov).toBeLessThanOrEqual(100);
     expect(after.fov).toBeGreaterThanOrEqual(95);
