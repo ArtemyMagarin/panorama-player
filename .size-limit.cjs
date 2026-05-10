@@ -4,7 +4,7 @@ module.exports = [
     name: 'PanoramaPlayer ESM (gzip)',
     path: 'dist/index.js',
     import: '{ PanoramaPlayer }',
-    limit: '15 KB',
+    limit: '6 KB',
     gzip: true,
   },
 ];
