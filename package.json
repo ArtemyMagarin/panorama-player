@@ -21,8 +21,9 @@
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "test": "jest",
-    "test:e2e": "playwright test",
+    "test:e2e": "pnpm build && pnpm e2e:fixture && playwright test",
     "e2e:install": "playwright install --with-deps",
+    "e2e:fixture": "node e2e/scripts/generate-fixture.mjs",
     "prepublishOnly": "pnpm run typecheck && pnpm run test && pnpm run build"
   },
   "keywords": [

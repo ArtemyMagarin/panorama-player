@@ -17,7 +17,11 @@ export class PointerInput {
 
   private readonly onPointerDown = (e: PointerEvent): void => {
     if (this.pointers.size >= 2) return;
-    this.element.setPointerCapture(e.pointerId);
+    try {
+      this.element.setPointerCapture(e.pointerId);
+    } catch {
+      // synthetic events or unsupported pointer ids — ignore
+    }
     this.pointers.set(e.pointerId, { id: e.pointerId, x: e.clientX, y: e.clientY });
     if (this.pointers.size === 2) {
       this.lastPinchDistance = this.measurePinchDistance();
@@ -45,8 +49,12 @@ export class PointerInput {
   };
 
   private readonly onPointerUp = (e: PointerEvent): void => {
-    if (this.element.hasPointerCapture(e.pointerId)) {
-      this.element.releasePointerCapture(e.pointerId);
+    try {
+      if (this.element.hasPointerCapture(e.pointerId)) {
+        this.element.releasePointerCapture(e.pointerId);
+      }
+    } catch {
+      // ignore — capture may not exist for synthetic events
     }
     this.pointers.delete(e.pointerId);
     this.lastPinchDistance =

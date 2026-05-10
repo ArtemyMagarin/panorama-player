@@ -19,7 +19,7 @@
       });
       player.mount(host);
       window.__pano = player;
-      window.__panoReady = player.loadImage('/e2e/fixtures/pano.jpg').then(() => {
+      window.__panoReady = player.loadImage('/e2e/fixtures/pano.png').then(() => {
         window.__panoLoaded = true;
       }).catch((err) => {
         window.__panoError = String(err);

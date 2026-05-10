@@ -23,8 +23,8 @@
       b.mount(document.getElementById('b'));
       window.__panos = [a, b];
       window.__panoReady = Promise.all([
-        a.loadImage('/e2e/fixtures/pano.jpg'),
-        b.loadImage('/e2e/fixtures/pano.jpg'),
+        a.loadImage('/e2e/fixtures/pano.png'),
+        b.loadImage('/e2e/fixtures/pano.png'),
       ]).then(() => {
         window.__panoLoaded = true;
       }).catch((err) => {
