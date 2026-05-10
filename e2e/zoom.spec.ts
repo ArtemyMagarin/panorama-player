@@ -60,6 +60,24 @@ test.describe('zoom', () => {
     await expect(hint).not.toHaveClass(/visible/);
   });
 
+  test('hint disappears immediately when user zooms with modifier held', async ({ page }) => {
+    const canvas = page.locator('canvas');
+    await canvas.hover();
+
+    const hint = page.locator('.panorama-player__hint');
+
+    await page.mouse.wheel(0, 100);
+    await expect(hint).toHaveClass(/visible/);
+
+    await page.keyboard.down('Control');
+    await page.mouse.wheel(0, -100);
+    await expect(hint).not.toHaveClass(/visible/);
+    await page.keyboard.up('Control');
+
+    await page.waitForTimeout(500);
+    await expect(hint).not.toHaveClass(/visible/);
+  });
+
   test('pinch via dispatched pointer events changes FOV', async ({ page, browserName }) => {
     test.skip(
       browserName === 'chromium' && !test.info().project.name.includes('mobile'),

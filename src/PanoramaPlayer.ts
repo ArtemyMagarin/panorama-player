@@ -183,6 +183,7 @@ export class PanoramaPlayer {
   private applyWheel(deltaY: number): void {
     const next = this.view.fov + deltaY * this.options.zoomSpeed;
     this.view.fov = clamp(next, this.options.fovRange[0], this.options.fovRange[1]);
+    this.hideHint();
     this.dirty = true;
     this.scheduleFrame();
   }
@@ -197,6 +198,15 @@ export class PanoramaPlayer {
       }
       this.hintTimeout = 0;
     }, 2000);
+  }
+
+  private hideHint(): void {
+    if (!this.hintElement) return;
+    if (this.hintTimeout) {
+      clearTimeout(this.hintTimeout);
+      this.hintTimeout = 0;
+    }
+    this.hintElement.classList.remove('visible');
   }
 
   private handleResize(): void {
