@@ -7,3 +7,5 @@ test-results/
 *.log
 .idea/
 .vscode/
+tasks/
+.claude/settings.local.json
