@@ -13,7 +13,7 @@ export function wrapDeg(value: number): number {
   let v = value % 360;
   if (v > 180) v -= 360;
   else if (v < -180) v += 360;
-  return v;
+  return v + 0;
 }
 
 export const degToRad = (d: number): number => (d * Math.PI) / 180;
