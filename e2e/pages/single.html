@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <title>panorama-player • single</title>
+    <style>
+      html, body { margin: 0; padding: 0; height: 100%; background: #111; }
+      #host { width: 100vw; height: 100vh; }
+    </style>
+  </head>
+  <body>
+    <div id="host" data-testid="host"></div>
+    <script type="module">
+      import { PanoramaPlayer } from '/dist/index.js';
+      const host = document.getElementById('host');
+      const player = new PanoramaPlayer({
+        initialView: { yaw: 0, pitch: 0, fov: 75 },
+      });
+      player.mount(host);
+      window.__pano = player;
+      window.__panoReady = player.loadImage('/e2e/fixtures/pano.jpg').then(() => {
+        window.__panoLoaded = true;
+      }).catch((err) => {
+        window.__panoError = String(err);
+      });
+    </script>
+  </body>
+</html>

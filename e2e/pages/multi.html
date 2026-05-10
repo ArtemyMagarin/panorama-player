@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <title>panorama-player • multi</title>
+    <style>
+      html, body { margin: 0; padding: 0; height: 100%; background: #111; }
+      .row { display: flex; height: 100vh; }
+      .pane { flex: 1; height: 100%; }
+    </style>
+  </head>
+  <body>
+    <div class="row">
+      <div id="a" class="pane" data-testid="host-a"></div>
+      <div id="b" class="pane" data-testid="host-b"></div>
+    </div>
+    <script type="module">
+      import { PanoramaPlayer } from '/dist/index.js';
+      const a = new PanoramaPlayer();
+      const b = new PanoramaPlayer({ initialView: { yaw: 90, pitch: 0, fov: 75 } });
+      a.mount(document.getElementById('a'));
+      b.mount(document.getElementById('b'));
+      window.__panos = [a, b];
+      window.__panoReady = Promise.all([
+        a.loadImage('/e2e/fixtures/pano.jpg'),
+        b.loadImage('/e2e/fixtures/pano.jpg'),
+      ]).then(() => {
+        window.__panoLoaded = true;
+      }).catch((err) => {
+        window.__panoError = String(err);
+      });
+    </script>
+  </body>
+</html>
