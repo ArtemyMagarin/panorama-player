@@ -21,6 +21,28 @@ const CSS = `
 .panorama-player__canvas:active {
   cursor: grabbing;
 }
+.panorama-player__hint {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+  color: rgba(255, 255, 255, 0.9);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease-out;
+  z-index: 10;
+}
+.panorama-player__hint.visible {
+  opacity: 1;
+}
 `;
 
 interface StyleHost extends HTMLStyleElement {

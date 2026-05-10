@@ -19,6 +19,8 @@ export class PanoramaPlayer {
   private dirty = true;
   private destroyed = false;
   private view: View;
+  private hintElement: HTMLElement | null = null;
+  private hintTimeout = 0;
 
   constructor(options?: PanoramaOptions) {
     this.options = resolveOptions(options);
@@ -38,20 +40,32 @@ export class PanoramaPlayer {
     const canvas = doc.createElement('canvas');
     canvas.className = 'panorama-player__canvas';
     root.appendChild(canvas);
+
+    const hint = doc.createElement('div');
+    hint.className = 'panorama-player__hint';
+    hint.textContent = 'Hold Ctrl and scroll to zoom';
+    root.appendChild(hint);
+
     container.appendChild(root);
 
     this.container = container;
     this.root = root;
     this.canvas = canvas;
+    this.hintElement = hint;
     this.renderer = new Renderer(canvas);
 
     this.pointerInput = new PointerInput(canvas, {
       onDrag: (dx, dy) => this.applyDrag(dx, dy),
       onPinch: (scale) => this.applyPinch(scale),
     });
-    this.wheelInput = new WheelInput(canvas, {
-      onWheel: (deltaY) => this.applyWheel(deltaY),
-    });
+    this.wheelInput = new WheelInput(
+      canvas,
+      {
+        onWheel: (deltaY) => this.applyWheel(deltaY),
+        onWheelRejected: () => this.showHint(),
+      },
+      this.options.wheelModifierRequired,
+    );
 
     if (typeof ResizeObserver !== 'undefined') {
       this.resizeObserver = new ResizeObserver(() => this.handleResize());
@@ -102,6 +116,10 @@ export class PanoramaPlayer {
       cancelAnimationFrame(this.rafHandle);
       this.rafHandle = 0;
     }
+    if (this.hintTimeout) {
+      clearTimeout(this.hintTimeout);
+      this.hintTimeout = 0;
+    }
     this.resizeObserver?.disconnect();
     this.resizeObserver = null;
     this.pointerInput?.dispose();
@@ -113,6 +131,7 @@ export class PanoramaPlayer {
     if (this.root && this.root.parentNode) this.root.parentNode.removeChild(this.root);
     this.root = null;
     this.canvas = null;
+    this.hintElement = null;
     if (this.container) {
       releaseStyles(this.container.ownerDocument ?? document);
       this.container = null;
@@ -128,6 +147,7 @@ export class PanoramaPlayer {
       zoomSpeed: this.options.zoomSpeed,
       pinchSpeed: this.options.pinchSpeed,
       devicePixelRatio: this.options.devicePixelRatio,
+      wheelModifierRequired: this.options.wheelModifierRequired,
     };
   }
 
@@ -164,6 +184,18 @@ export class PanoramaPlayer {
     this.view.fov = clamp(next, this.options.fovRange[0], this.options.fovRange[1]);
     this.dirty = true;
     this.scheduleFrame();
+  }
+
+  private showHint(): void {
+    if (!this.hintElement) return;
+    if (this.hintTimeout) clearTimeout(this.hintTimeout);
+    this.hintElement.classList.add('visible');
+    this.hintTimeout = window.setTimeout(() => {
+      if (this.hintElement) {
+        this.hintElement.classList.remove('visible');
+      }
+      this.hintTimeout = 0;
+    }, 2000);
   }
 
   private handleResize(): void {
