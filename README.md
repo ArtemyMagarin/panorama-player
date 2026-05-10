@@ -31,7 +31,7 @@ player.destroy();
 ## Interactions
 
 - **Drag (mouse / touch)**: pointer drag rotates yaw and pitch.
-- **Scroll wheel**: requires **Ctrl** (or **Cmd** on Mac). Rotate wheel to zoom in/out. Scroll without modifier allows page scrolling (with hint overlay).
+- **Scroll wheel**: requires **Ctrl** (or **⌘ Cmd** on Mac). Rotate wheel to zoom in/out. Scroll without modifier allows page scrolling — an overlay hint appears showing the correct modifier for your platform.
 - **Pinch (touch)**: two-finger pinch zooms in/out.
 
 ## API

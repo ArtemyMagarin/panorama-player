@@ -43,7 +43,8 @@ export class PanoramaPlayer {
 
     const hint = doc.createElement('div');
     hint.className = 'panorama-player__hint';
-    hint.textContent = 'Hold Ctrl and scroll to zoom';
+    const isMac = /Mac|iPhone|iPad|iPod/.test(navigator.platform || '');
+    hint.textContent = isMac ? 'Hold ⌘ and scroll to zoom' : 'Hold Ctrl and scroll to zoom';
     root.appendChild(hint);
 
     container.appendChild(root);
