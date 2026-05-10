@@ -44,7 +44,7 @@
     "@playwright/test": "^1.48.0",
     "@size-limit/preset-small-lib": "^12.1.0",
     "@types/jest": "^29.5.12",
-    "@types/node": "^20.14.0",
+    "@types/node": "^24.0.0",
     "eslint": "^9.39.4",
     "eslint-config-prettier": "^9.1.2",
     "jest": "^29.7.0",

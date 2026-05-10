@@ -7,7 +7,7 @@ export default defineConfig({
   testMatch: /.*\.spec\.ts$/,
   fullyParallel: false,
   retries: 0,
-  reporter: [['list']],
+  reporter: [['list'], ['html']],
   use: {
     baseURL: `http://localhost:${PORT}`,
     headless: true,
