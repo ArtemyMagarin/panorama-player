@@ -38,6 +38,20 @@ test.describe('zoom', () => {
     expect(after.fov).toBeGreaterThanOrEqual(95);
   });
 
+  test('wheel without modifier shows hint overlay, then hides after 2s', async ({ page }) => {
+    const canvas = page.locator('canvas');
+    await canvas.hover();
+
+    const hint = page.locator('.panorama-player__hint');
+    await expect(hint).not.toHaveClass(/visible/);
+
+    await page.mouse.wheel(0, 100);
+    await expect(hint).toHaveClass(/visible/);
+
+    await page.waitForTimeout(2100);
+    await expect(hint).not.toHaveClass(/visible/);
+  });
+
   test('pinch via dispatched pointer events changes FOV', async ({ page, browserName }) => {
     test.skip(
       browserName === 'chromium' && !test.info().project.name.includes('mobile'),
