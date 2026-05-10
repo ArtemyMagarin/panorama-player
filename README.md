@@ -28,6 +28,12 @@ player.setView({ yaw: 90 });
 player.destroy();
 ```
 
+## Interactions
+
+- **Drag (mouse / touch)**: pointer drag rotates yaw and pitch.
+- **Scroll wheel**: requires **Ctrl** (or **Cmd** on Mac). Rotate wheel to zoom in/out. Scroll without modifier allows page scrolling (with hint overlay).
+- **Pinch (touch)**: two-finger pinch zooms in/out.
+
 ## API
 
 | Method                            | Description                                                                |
@@ -51,6 +57,7 @@ interface PanoramaOptions {
   zoomSpeed?: number; // default 0.05 (wheel)
   pinchSpeed?: number; // default 0.5
   devicePixelRatio?: number; // default min(window.devicePixelRatio, 2)
+  wheelModifierRequired?: boolean; // default true; if true, wheel zoom requires Ctrl/Cmd key
 }
 ```
 
