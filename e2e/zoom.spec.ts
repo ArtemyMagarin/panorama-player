@@ -6,6 +6,18 @@ test.describe('zoom', () => {
     await page.waitForFunction(() => (window as any).__panoLoaded === true);
   });
 
+  test('wheel without modifier zooms when modifier not required', async ({ page }) => {
+    await page.goto('/e2e/pages/no-modifier-required.html');
+    await page.waitForFunction(() => (window as any).__panoLoaded === true);
+
+    const before = await page.evaluate(() => (window as any).__pano.getView());
+    const canvas = page.locator('canvas');
+    await canvas.hover();
+    await page.mouse.wheel(0, -100);
+    const after = await page.evaluate(() => (window as any).__pano.getView());
+    expect(after.fov).toBeLessThan(before.fov);
+  });
+
   test('wheel down zooms in (decreases FOV); clamped at fovRange[0]', async ({ page }) => {
     const before = await page.evaluate(() => (window as any).__pano.getView());
 

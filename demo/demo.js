@@ -59,7 +59,9 @@ function loadImage(imageSource) {
 
   try {
     if (!currentPlayer) {
-      currentPlayer = new PanoramaPlayer();
+      currentPlayer = new PanoramaPlayer({
+        wheelModifierRequired: false,
+      });
       currentPlayer.mount(playerContainer);
     }
   } catch (err) {
