@@ -13,6 +13,7 @@ export interface PanoramaOptions {
   pinchSpeed?: number;
   devicePixelRatio?: number;
   wheelModifierRequired?: boolean;
+  fullscreenEnabled?: boolean;
 }
 
 export interface ResolvedOptions {
@@ -24,6 +25,7 @@ export interface ResolvedOptions {
   pinchSpeed: number;
   devicePixelRatio: number;
   wheelModifierRequired: boolean;
+  fullscreenEnabled: boolean;
 }
 
 export const DEFAULTS: ResolvedOptions = {
@@ -35,6 +37,7 @@ export const DEFAULTS: ResolvedOptions = {
   pinchSpeed: 0.5,
   devicePixelRatio: typeof window !== 'undefined' ? Math.min(window.devicePixelRatio ?? 1, 2) : 1,
   wheelModifierRequired: true,
+  fullscreenEnabled: true,
 };
 
 export function resolveOptions(opts?: PanoramaOptions): ResolvedOptions {
@@ -47,5 +50,6 @@ export function resolveOptions(opts?: PanoramaOptions): ResolvedOptions {
     pinchSpeed: opts?.pinchSpeed ?? DEFAULTS.pinchSpeed,
     devicePixelRatio: opts?.devicePixelRatio ?? DEFAULTS.devicePixelRatio,
     wheelModifierRequired: opts?.wheelModifierRequired ?? DEFAULTS.wheelModifierRequired,
+    fullscreenEnabled: opts?.fullscreenEnabled ?? DEFAULTS.fullscreenEnabled,
   };
 }

@@ -5,6 +5,21 @@ import { type PanoramaOptions, type ResolvedOptions, type View, resolveOptions }
 import { clamp, wrapDeg } from './utils/clamp.js';
 import { loadImage } from './utils/loadImage.js';
 import { acquireStyles, releaseStyles } from './utils/styles.js';
+import {
+  isFullscreenAvailable,
+  requestFullscreen,
+  exitFullscreen,
+  isFullscreen,
+  onFullscreenChange,
+} from './utils/fullscreen.js';
+
+const FULLSCREEN_ENTER_ICON = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+  <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+</svg>`;
+
+const FULLSCREEN_EXIT_ICON = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+  <path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/>
+</svg>`;
 
 export class PanoramaPlayer {
   private options: ResolvedOptions;
@@ -21,6 +36,9 @@ export class PanoramaPlayer {
   private view: View;
   private hintElement: HTMLElement | null = null;
   private hintTimeout = 0;
+  private fullscreenButton: HTMLElement | null = null;
+  private unsubscribeFullscreenChange: (() => void) | null = null;
+  private fullscreenToggling = false;
 
   constructor(options?: PanoramaOptions) {
     this.options = resolveOptions(options);
@@ -46,6 +64,21 @@ export class PanoramaPlayer {
     const isMac = /Mac|iPhone|iPad|iPod/.test(navigator.platform || '');
     hint.textContent = isMac ? 'Hold ⌘ and scroll to zoom' : 'Hold Ctrl and scroll to zoom';
     root.appendChild(hint);
+
+    if (this.options.fullscreenEnabled && isFullscreenAvailable()) {
+      const btn = doc.createElement('button');
+      btn.className = 'panorama-player__fullscreen-btn';
+      btn.setAttribute('type', 'button');
+      btn.setAttribute('aria-label', 'Enter fullscreen');
+      btn.innerHTML = this.getFullscreenIcon(false);
+      btn.addEventListener('click', () => this.toggleFullscreen());
+      root.appendChild(btn);
+      this.fullscreenButton = btn;
+
+      this.unsubscribeFullscreenChange = onFullscreenChange(() => {
+        this.updateFullscreenButton();
+      });
+    }
 
     container.appendChild(root);
 
@@ -130,10 +163,14 @@ export class PanoramaPlayer {
     this.wheelInput = null;
     this.renderer?.dispose();
     this.renderer = null;
+    this.unsubscribeFullscreenChange?.();
+    this.unsubscribeFullscreenChange = null;
+    this.fullscreenToggling = false;
     if (this.root && this.root.parentNode) this.root.parentNode.removeChild(this.root);
     this.root = null;
     this.canvas = null;
     this.hintElement = null;
+    this.fullscreenButton = null;
     if (this.container) {
       releaseStyles(this.container.ownerDocument ?? document);
       this.container = null;
@@ -150,6 +187,7 @@ export class PanoramaPlayer {
       pinchSpeed: this.options.pinchSpeed,
       devicePixelRatio: this.options.devicePixelRatio,
       wheelModifierRequired: this.options.wheelModifierRequired,
+      fullscreenEnabled: this.options.fullscreenEnabled,
     };
   }
 
@@ -229,5 +267,37 @@ export class PanoramaPlayer {
       this.dirty = false;
       this.renderer.draw(this.view);
     });
+  }
+
+  private toggleFullscreen(): void {
+    if (!this.root || this.fullscreenToggling) return;
+    this.fullscreenToggling = true;
+    const cleanup = () => {
+      this.fullscreenToggling = false;
+    };
+    if (isFullscreen()) {
+      exitFullscreen()
+        .then(cleanup)
+        .catch(() => {
+          cleanup();
+        });
+    } else {
+      requestFullscreen(this.root)
+        .then(cleanup)
+        .catch(() => {
+          cleanup();
+        });
+    }
+  }
+
+  private updateFullscreenButton(): void {
+    if (!this.fullscreenButton) return;
+    const isFs = isFullscreen();
+    this.fullscreenButton.innerHTML = this.getFullscreenIcon(isFs);
+    this.fullscreenButton.setAttribute('aria-label', isFs ? 'Exit fullscreen' : 'Enter fullscreen');
+  }
+
+  private getFullscreenIcon(isFullscreen: boolean): string {
+    return isFullscreen ? FULLSCREEN_EXIT_ICON : FULLSCREEN_ENTER_ICON;
   }
 }

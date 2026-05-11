@@ -35,6 +35,7 @@ player.destroy();
 - **Drag (mouse / touch)**: pointer drag rotates yaw and pitch.
 - **Scroll wheel**: requires **Ctrl** (or **⌘ Cmd** on Mac). Rotate wheel to zoom in/out. Scroll without modifier allows page scrolling — an overlay hint appears showing the correct modifier for your platform.
 - **Pinch (touch)**: two-finger pinch zooms in/out.
+- **Fullscreen button**: click to enter/exit fullscreen mode (only shown when fullscreen API is available and `fullscreenEnabled` option is true).
 
 ## API
 
@@ -60,6 +61,7 @@ interface PanoramaOptions {
   pinchSpeed?: number; // default 0.5
   devicePixelRatio?: number; // default min(window.devicePixelRatio, 2)
   wheelModifierRequired?: boolean; // default true; if true, wheel zoom requires Ctrl/Cmd key
+  fullscreenEnabled?: boolean; // default true; if true, shows fullscreen button when supported
 }
 ```
 

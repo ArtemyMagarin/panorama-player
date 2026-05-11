@@ -28,20 +28,20 @@ src/
   index.ts                    # Public exports (PanoramaPlayer, PanoramaOptions, View)
   types.ts                    # Options, View, DEFAULTS, resolveOptions()
   PanoramaPlayer.ts           # Orchestrator: lifecycle, input callbacks, view state
-  
+
   renderer/
     Renderer.ts               # WebGL program, buffers, texture, draw loop, context creation
     shaders.ts                # GLSL: both WebGL2 (v300) and WebGL1 (ES 100) variants
     sphere.ts                 # buildSphere(latBands, lonBands) → { positions, uvs, indices }
-  
+
   input/
     PointerInput.ts           # Pointer drag → yaw/pitch deltas (mouse + touch unified)
     WheelInput.ts             # Wheel + modifier check → FOV delta (or hint if rejected)
-  
+
   math/
     mat4.ts                   # Matrix ops: identity, perspective, rotationX, rotationY, multiply
     camera.ts                 # buildViewProjection(view, aspect) → combined view-proj matrix
-  
+
   utils/
     clamp.ts                  # clamp(v, min, max), wrapDeg(v), degToRad(v)
     loadImage.ts              # Converts string/HTMLImageElement → HTMLImageElement
@@ -55,7 +55,7 @@ e2e/
     single.html               # Test page with wheelModifierRequired: true (default)
     no-modifier-required.html # Test page with wheelModifierRequired: false
     multi.html                # Two independent players
-  
+
   drag.spec.ts                # Pointer drag direction, vertical pitch clamping
   zoom.spec.ts                # Wheel zoom with/without modifier, pinch zoom
   scroll.spec.ts              # Page scroll unaffected when no modifier
@@ -104,6 +104,7 @@ private scheduleFrame() {
 - On `destroy()`, disposes all GPU resources and calls `loseContext()`
 
 **Key gotchas:**
+
 - Canvas must NOT be in a `display: none` container when creating context (iOS Safari issue)
 - Explicit 1×1 canvas dimensions before `getContext()` helps with some iOS versions
 - Minimal context attributes reduce GPU memory pressure on low-end devices
@@ -116,6 +117,7 @@ Both **WebGL2 (v300 ES)** and **WebGL1 (ES 100)** shaders compute the same trans
 - **Fragment**: Sample equirectangular texture using interpolated UV
 
 **Differences:**
+
 - WebGL2: `layout(location = N)`, `in/out`, `texture()`
 - WebGL1: `bindAttribLocation()`, `attribute/varying`, `texture2D()`, `gl_FragColor`
 
@@ -124,6 +126,7 @@ The renderer selects shaders at runtime based on `this.isWebGL2`.
 ### 4. Sphere Geometry
 
 `buildSphere(latBands, lonBands)` generates:
+
 - **positions**: Float32Array of 3D vertices on unit sphere
 - **uvs**: Float32Array of texture coordinates (u = atan2(z,x)/2π + 0.5, v = asin(y)/π + 0.5)
 - **indices**: Uint16Array of triangle indices
@@ -136,8 +139,8 @@ Recomputed per-instance (geometry is cheap, GPU context is not shareable).
 `utils/styles.ts` manages a single shared `<style id="panorama-player-styles">`:
 
 ```typescript
-acquireStyles(doc)  // First call: inject <style>; increment counter
-releaseStyles(doc)  // Last call (counter = 0): remove <style>
+acquireStyles(doc); // First call: inject <style>; increment counter
+releaseStyles(doc); // Last call (counter = 0): remove <style>
 ```
 
 Multiple instances call `acquire` in `mount()`, `release` in `destroy()`. This saves DOM bloat and ensures CSS rules are loaded once.
@@ -145,17 +148,21 @@ Multiple instances call `acquire` in `mount()`, `release` in `destroy()`. This s
 ### 6. Input Direction Conventions
 
 **Horizontal drag:**
+
 - Rightward drag (positive dx) → yaw **increases** → view rotates left (see left side)
 - Leftward drag (negative dx) → yaw **decreases** → view rotates right
 
 **Vertical drag:**
+
 - Downward drag (positive dy) → pitch **increases** → view rotates up
 
 **Wheel:**
+
 - Scroll down (negative deltaY) → fov decreases → zoom in
 - Scroll up (positive deltaY) → fov increases → zoom out
 
 **Pinch:**
+
 - Two fingers moving apart (distance increases) → fov decreases → zoom in
 - Two fingers moving together (distance decreases) → fov increases → zoom out
 
@@ -178,6 +185,7 @@ pnpm test:e2e     # Build, generate fixture, run Playwright on chromium + mobile
 ```
 
 E2E tests in `e2e/pages/` and `e2e/*.spec.ts` run against real WebGL contexts. They verify:
+
 - Drag direction and clamping
 - Wheel zoom with/without modifier
 - Pinch zoom

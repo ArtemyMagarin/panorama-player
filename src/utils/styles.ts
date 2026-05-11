@@ -43,6 +43,32 @@ const CSS = `
 .panorama-player__hint.visible {
   opacity: 1;
 }
+.panorama-player__fullscreen-btn {
+  position: absolute;
+  bottom: 12px;   /* Vertical padding from bottom */
+  right: 12px;    /* Horizontal padding from right */
+  width: 40px;    /* Touch-friendly button size */
+  height: 40px;   /* Touch-friendly button size */
+  padding: 8px;   /* Internal padding around icon */
+  background: rgba(0, 0, 0, 0.6);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  transition: opacity 0.2s ease-out;
+  z-index: 20;    /* Above canvas but below modals */
+}
+.panorama-player__fullscreen-btn:hover {
+  background: rgba(0, 0, 0, 0.8);
+}
+.panorama-player__fullscreen-btn svg {
+  width: 24px;
+  height: 24px;
+  fill: rgba(255, 255, 255, 0.9);
+}
 `;
 
 interface StyleHost extends HTMLStyleElement {

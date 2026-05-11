@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fullscreen Test</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 20px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      }
+      .container {
+        width: 800px;
+        height: 600px;
+        margin: 0 auto;
+        border: 1px solid #ccc;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container" id="host"></div>
+    <script type="module">
+      import { PanoramaPlayer } from '/dist/index.js';
+
+      const host = document.getElementById('host');
+      const player = new PanoramaPlayer({
+        fullscreenEnabled: true,
+      });
+      player.mount(host);
+      await player.loadImage('/e2e/fixtures/pano.png');
+
+      window.player = player;
+    </script>
+  </body>
+</html>
