@@ -9,8 +9,10 @@ const gallery = document.getElementById('gallery');
 const backButton = document.getElementById('back-button');
 const loading = document.getElementById('loading');
 const infoText = document.getElementById('info-text');
+const attributionOverlay = document.getElementById('attribution-overlay');
 
 let currentPlayer = null;
+let currentAttribution = null;
 
 function showError(message) {
   errorEl.textContent = message;
@@ -43,6 +45,7 @@ function showWelcome() {
   playerContainer.classList.remove('active');
   backButton.classList.remove('show');
   infoText.classList.remove('show');
+  attributionOverlay.classList.remove('show');
 }
 
 function showPlayer() {
@@ -50,11 +53,16 @@ function showPlayer() {
   playerContainer.classList.add('active');
   backButton.classList.add('show');
   infoText.classList.add('show');
+  if (currentAttribution) {
+    attributionOverlay.innerHTML = currentAttribution;
+    attributionOverlay.classList.add('show');
+  }
 }
 
-function loadImage(imageSource) {
+function loadImage(imageSource, attribution = null) {
   showLoading();
   errorEl.classList.remove('show');
+  currentAttribution = attribution;
   showPlayer();
 
   try {
@@ -167,40 +175,69 @@ uploadArea.addEventListener('drop', (e) => {
 
 backButton.addEventListener('click', showWelcome);
 
-function createExampleCanvas(hueStart = 0) {
-  const canvas = document.createElement('canvas');
-  canvas.width = 256;
-  canvas.height = 128;
-  const ctx = canvas.getContext('2d');
-
-  for (let x = 0; x < canvas.width; x++) {
-    for (let y = 0; y < canvas.height; y++) {
-      const hue = ((x / canvas.width + hueStart) % 1) * 360;
-      const sat = 70 + (y / canvas.height) * 20;
-      const lig = 40 + (y / canvas.height) * 30;
-      ctx.fillStyle = `hsl(${hue}, ${sat}%, ${lig}%)`;
-      ctx.fillRect(x, y, 1, 1);
-    }
-  }
-
-  return canvas;
-}
-
 const examples = [
-  { name: 'Warm', hue: 0 },
-  { name: 'Cool', hue: 0.5 },
-  { name: 'Green', hue: 0.3 },
+  {
+    previewUrl:
+      './images/960px-0300a_ITA_Bergamo_Duomo_-_Cattedrale_S_Alessandro_-_360_planar_V-P.jpg',
+    fullUrl:
+      './images/3840px-0300a_ITA_Bergamo_Duomo_-_Cattedrale_S_Alessandro_-_360_planar_V-P.jpg',
+    attribution:
+      '<a href="https://commons.wikimedia.org/wiki/File:0300a_ITA_Bergamo_Duomo_-_Cattedrale_S_Alessandro_-_360_planar_V-P.jpg">Virtual-Pano</a>, <a href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a>, via Wikimedia Commons',
+  },
+  {
+    previewUrl: './images/960px-12-13_Linia_26_2016-06_1465217094.jpg',
+    fullUrl: './images/12-13_Linia_26_2016-06_1465217094.jpg',
+    attribution:
+      '<a href="https://commons.wikimedia.org/wiki/File:12-13_Linia_26_2016-06_1465217094.jpg">Artem Svetlov</a>, <a href="https://creativecommons.org/licenses/by/4.0">CC BY 4.0</a>, via Wikimedia Commons',
+  },
+  {
+    previewUrl: './images/960px-12_Antikenkopien_am_Obeliskportal,_Sanssouci,_Potsdam-0011075.jpg',
+    fullUrl: './images/12_Antikenkopien_am_Obeliskportal,_Sanssouci,_Potsdam-0011075.jpg',
+    attribution: '© Raimond Spekking',
+  },
+  {
+    previewUrl: './images/960px-2011-03-06_interior_of_a_Shinkansen_N700.jpg',
+    fullUrl: './images/2011-03-06_interior_of_a_Shinkansen_N700.jpg',
+    attribution:
+      '<a href="https://commons.wikimedia.org/wiki/File:2011-03-06_interior_of_a_Shinkansen_N700.jpg">Masakazu Matsumoto</a>, <a href="https://creativecommons.org/licenses/by/2.0">CC BY 2.0</a>, via Wikimedia Commons',
+  },
+  {
+    previewUrl: './images/960px-2016_Moscow_metro_exhibition_(26928471660).jpg',
+    fullUrl: './images/2016_Moscow_metro_exhibition_(26928471660).jpg',
+    attribution:
+      '<a href="https://commons.wikimedia.org/wiki/File:2016_Moscow_metro_exhibition_(26928471660).jpg">Artem Svetlov from Moscow, Russia</a>, <a href="https://creativecommons.org/licenses/by/2.0">CC BY 2.0</a>, via Wikimedia Commons',
+  },
+  {
+    previewUrl: './images/960px-Soissons_Cathedral_Interior_360x180,_Picardy,_France_-_Diliff.jpg',
+    fullUrl: './images/Soissons_Cathedral_Interior_360x180,_Picardy,_France_-_Diliff.jpg',
+    attribution:
+      '<a href="https://commons.wikimedia.org/wiki/File:Soissons_Cathedral_Interior_360x180,_Picardy,_France_-_Diliff.jpg">Diliff</a>, <a href="https://creativecommons.org/licenses/by-sa/3.0">CC BY-SA 3.0</a>, via Wikimedia Commons',
+  },
 ];
 
-examples.forEach(({ hue }) => {
+examples.forEach(({ name, previewUrl, fullUrl, attribution }) => {
   const item = document.createElement('div');
   item.className = 'gallery-item';
-  const canvas = createExampleCanvas(hue);
-  item.appendChild(canvas);
+
+  const img = document.createElement('img');
+  img.src = previewUrl;
+  img.alt = name;
+  img.loading = 'lazy';
+
+  const attributionEl = document.createElement('div');
+  attributionEl.className = 'attribution';
+  attributionEl.innerHTML = attribution;
+
+  item.appendChild(img);
+  item.appendChild(attributionEl);
+
   item.addEventListener('click', () => {
-    const img = new Image();
-    img.src = canvas.toDataURL();
-    loadImage(img);
+    loadImage(fullUrl, attribution);
   });
+
+  attributionEl.addEventListener('click', (e) => {
+    e.stopPropagation();
+  });
+
   gallery.appendChild(item);
 });
