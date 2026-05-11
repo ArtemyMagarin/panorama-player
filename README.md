@@ -67,7 +67,13 @@ Each `PanoramaPlayer` owns its own canvas + WebGL2 context + texture. The shared
 
 ## Demo
 
-Open `demo/index.html` in your browser (requires `pnpm build` first) to try the player:
+**Live demo:** https://your-username.github.io/panorama-player (after deploying)
+
+Or locally:
+1. `pnpm build`
+2. Open `demo/index.html` in your browser
+
+**Features:**
 - Upload your own 2:1 equirectangular images via drag-drop
 - Try example panoramas from the gallery
 - No external dependencies, runs entirely in the browser
