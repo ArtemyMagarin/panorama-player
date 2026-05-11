@@ -164,7 +164,7 @@ export class PanoramaPlayer {
     if (!this.canvas) return;
     const heightPx = this.canvas.clientHeight || 1;
     const fovScale = this.view.fov / heightPx;
-    this.view.yaw = wrapDeg(this.view.yaw - dxPx * fovScale * this.options.dragSpeed * 4);
+    this.view.yaw = wrapDeg(this.view.yaw + dxPx * fovScale * this.options.dragSpeed * 4);
     this.view.pitch = clamp(
       this.view.pitch + dyPx * fovScale * this.options.dragSpeed * 4,
       this.options.pitchRange[0],
