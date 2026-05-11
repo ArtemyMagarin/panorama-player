@@ -1,4 +1,4 @@
-import { PanoramaPlayer } from '../dist/index.js';
+import { PanoramaPlayer } from './dist/index.js';
 
 const welcome = document.getElementById('welcome');
 const playerContainer = document.getElementById('player-container');
