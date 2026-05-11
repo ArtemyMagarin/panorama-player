@@ -56,16 +56,12 @@ function loadImage(imageSource) {
   showLoading();
   errorEl.classList.remove('show');
 
-  if (currentPlayer) {
-    currentPlayer.destroy();
+  if (!currentPlayer) {
+    currentPlayer = new PanoramaPlayer();
+    currentPlayer.mount(playerContainer);
   }
 
-  playerContainer.innerHTML = '';
-  const player = new PanoramaPlayer();
-  currentPlayer = player;
-  player.mount(playerContainer);
-
-  player
+  currentPlayer
     .loadImage(imageSource)
     .then(() => {
       hideLoading();
