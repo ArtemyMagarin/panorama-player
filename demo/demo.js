@@ -55,20 +55,28 @@ function showPlayer() {
 function loadImage(imageSource) {
   showLoading();
   errorEl.classList.remove('show');
+  showPlayer();
 
-  if (!currentPlayer) {
-    currentPlayer = new PanoramaPlayer();
-    currentPlayer.mount(playerContainer);
+  try {
+    if (!currentPlayer) {
+      currentPlayer = new PanoramaPlayer();
+      currentPlayer.mount(playerContainer);
+    }
+  } catch (err) {
+    hideLoading();
+    showWelcome();
+    showError(`Failed to initialize player: ${err.message}`);
+    return;
   }
 
   currentPlayer
     .loadImage(imageSource)
     .then(() => {
       hideLoading();
-      showPlayer();
     })
     .catch((err) => {
       hideLoading();
+      showWelcome();
       showError(`Failed to load image: ${err.message}`);
     });
 }
