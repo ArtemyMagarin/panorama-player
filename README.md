@@ -2,6 +2,8 @@
 
 Browser-only WebGL2 player for equirectangular panoramas. Framework-agnostic, **zero runtime dependencies**, multiple players per page, mouse + touch + wheel + pinch.
 
+**Live demo:** https://artemymagarin.github.io/panorama-player/
+
 ## Install
 
 ```sh
@@ -67,13 +69,15 @@ Each `PanoramaPlayer` owns its own canvas + WebGL2 context + texture. The shared
 
 ## Demo
 
-**Live demo:** https://your-username.github.io/panorama-player (after deploying)
+**Live demo:** https://artemymagarin.github.io/panorama-player/
 
 Or locally:
+
 1. `pnpm build`
 2. Open `demo/index.html` in your browser
 
 **Features:**
+
 - Upload your own 2:1 equirectangular images via drag-drop
 - Try example panoramas from the gallery
 - No external dependencies, runs entirely in the browser

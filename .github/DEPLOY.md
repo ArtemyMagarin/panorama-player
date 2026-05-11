@@ -30,6 +30,7 @@ https://<your-username>.github.io/<repo-name>
 ```
 
 For example, if your repo is `user/panorama-player`:
+
 ```
 https://user.github.io/panorama-player
 ```
@@ -47,11 +48,13 @@ Then open `demo/index.html` in your browser.
 ## Troubleshooting
 
 **Workflow fails:** Check the **Actions** tab for error details. Common issues:
+
 - Node version mismatch (uses Node 24)
 - pnpm version mismatch (uses pnpm 10)
 - Missing build artifacts
 
 **Demo doesn't load:** Ensure:
+
 - GitHub Pages is enabled in repository settings
 - The workflow ran successfully (check Actions tab)
 - Your browser has JavaScript enabled
