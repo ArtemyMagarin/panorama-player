@@ -51,16 +51,17 @@ export class PanoramaPlayer {
 
     this.container = container;
     this.root = root;
-    this.canvas = canvas;
     this.hintElement = hint;
     this.renderer = new Renderer(canvas);
+    // Renderer may have replaced the canvas (e.g. WebGL2 → WebGL1 fallback)
+    this.canvas = this.renderer.canvas;
 
-    this.pointerInput = new PointerInput(canvas, {
+    this.pointerInput = new PointerInput(this.canvas, {
       onDrag: (dx, dy) => this.applyDrag(dx, dy),
       onPinch: (scale) => this.applyPinch(scale),
     });
     this.wheelInput = new WheelInput(
-      canvas,
+      this.canvas,
       {
         onWheel: (deltaY) => this.applyWheel(deltaY),
         onWheelRejected: () => this.showHint(),
