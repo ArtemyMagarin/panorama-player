@@ -14,16 +14,33 @@ export class Renderer {
   private uViewProjLoc: WebGLUniformLocation | null = null;
   private geometry: SphereGeometry;
   private hasImage = false;
+  private contextLost = false;
 
   constructor(canvas: HTMLCanvasElement) {
     const gl = canvas.getContext('webgl2', {
       antialias: true,
       preserveDrawingBuffer: false,
-      powerPreference: 'high-performance',
+      powerPreference: 'low-power',
     });
     if (!gl) throw new Error('panorama-player: WebGL2 is not supported');
     this.gl = gl;
     this.geometry = buildSphere(32, 64);
+
+    canvas.addEventListener('webglcontextlost', (e) => {
+      e.preventDefault();
+      this.contextLost = true;
+    });
+    canvas.addEventListener('webglcontextrestored', () => {
+      this.contextLost = false;
+      try {
+        this.initProgram();
+        this.initBuffers();
+        this.initTexture();
+      } catch {
+        this.contextLost = true;
+      }
+    });
+
     this.initProgram();
     this.initBuffers();
     this.initTexture();
@@ -123,6 +140,7 @@ export class Renderer {
   }
 
   draw(view: View): void {
+    if (this.contextLost) return;
     const gl = this.gl;
     const canvas = gl.canvas as HTMLCanvasElement;
     gl.clear(gl.COLOR_BUFFER_BIT);
