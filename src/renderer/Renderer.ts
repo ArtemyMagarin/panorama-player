@@ -24,7 +24,7 @@ export class Renderer {
     });
     if (!gl) throw new Error('panorama-player: WebGL2 is not supported');
     this.gl = gl;
-    this.geometry = buildSphere(32, 64);
+    this.geometry = buildSphere(16, 32);
 
     canvas.addEventListener('webglcontextlost', (e) => {
       e.preventDefault();
@@ -123,10 +123,19 @@ export class Renderer {
 
   uploadImage(image: HTMLImageElement | ImageBitmap): void {
     const gl = this.gl;
-    gl.bindTexture(gl.TEXTURE_2D, this.texture);
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image as TexImageSource);
-    this.hasImage = true;
+    if (gl.isContextLost()) {
+      this.contextLost = true;
+      throw new Error('panorama-player: WebGL context lost during texture upload');
+    }
+    try {
+      gl.bindTexture(gl.TEXTURE_2D, this.texture);
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image as TexImageSource);
+      this.hasImage = true;
+    } catch (e) {
+      this.contextLost = true;
+      throw e;
+    }
   }
 
   resize(width: number, height: number): void {
@@ -140,8 +149,11 @@ export class Renderer {
   }
 
   draw(view: View): void {
-    if (this.contextLost) return;
     const gl = this.gl;
+    if (this.contextLost || gl.isContextLost()) {
+      this.contextLost = true;
+      return;
+    }
     const canvas = gl.canvas as HTMLCanvasElement;
     gl.clear(gl.COLOR_BUFFER_BIT);
     if (!this.hasImage || !this.program || !this.vao) return;
@@ -160,12 +172,14 @@ export class Renderer {
 
   dispose(): void {
     const gl = this.gl;
-    if (this.vao) gl.deleteVertexArray(this.vao);
-    if (this.positionVbo) gl.deleteBuffer(this.positionVbo);
-    if (this.uvVbo) gl.deleteBuffer(this.uvVbo);
-    if (this.ibo) gl.deleteBuffer(this.ibo);
-    if (this.texture) gl.deleteTexture(this.texture);
-    if (this.program) gl.deleteProgram(this.program);
+    if (!gl.isContextLost()) {
+      if (this.vao) gl.deleteVertexArray(this.vao);
+      if (this.positionVbo) gl.deleteBuffer(this.positionVbo);
+      if (this.uvVbo) gl.deleteBuffer(this.uvVbo);
+      if (this.ibo) gl.deleteBuffer(this.ibo);
+      if (this.texture) gl.deleteTexture(this.texture);
+      if (this.program) gl.deleteProgram(this.program);
+    }
     this.vao = null;
     this.positionVbo = null;
     this.uvVbo = null;
