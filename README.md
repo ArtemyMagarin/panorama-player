@@ -65,6 +65,13 @@ interface PanoramaOptions {
 
 Each `PanoramaPlayer` owns its own canvas + WebGL2 context + texture. The shared stylesheet (`#panorama-player-styles`) is reference-counted: injected once on first `mount`, removed when the last player is destroyed.
 
+## Demo
+
+Open `demo/index.html` in your browser (requires `pnpm build` first) to try the player:
+- Upload your own 2:1 equirectangular images via drag-drop
+- Try example panoramas from the gallery
+- No external dependencies, runs entirely in the browser
+
 ## Development
 
 ```sh

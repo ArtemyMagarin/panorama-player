@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>panorama-player demo</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        height: 100%;
+        background: #0a0e27;
+        color: #fff;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      }
+
+      #player-container {
+        display: none;
+        width: 100%;
+        height: 100vh;
+      }
+
+      #player-container.active {
+        display: block;
+      }
+
+      #welcome {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 20px;
+        background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+      }
+
+      #welcome.hidden {
+        display: none;
+      }
+
+      .welcome-content {
+        text-align: center;
+        max-width: 600px;
+      }
+
+      h1 {
+        font-size: 2.5em;
+        margin-bottom: 10px;
+        font-weight: 600;
+      }
+
+      .subtitle {
+        font-size: 1.2em;
+        color: #aaa;
+        margin-bottom: 40px;
+      }
+
+      .section {
+        margin-bottom: 50px;
+      }
+
+      .section-title {
+        font-size: 1.1em;
+        color: #999;
+        margin-bottom: 20px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      #upload-area {
+        border: 2px dashed #444;
+        border-radius: 8px;
+        padding: 40px;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+
+      #upload-area:hover {
+        border-color: #666;
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      #upload-area.drag-over {
+        border-color: #0080ff;
+        background: rgba(0, 128, 255, 0.1);
+      }
+
+      .upload-icon {
+        font-size: 3em;
+        margin-bottom: 15px;
+      }
+
+      .upload-text {
+        font-size: 1.1em;
+        margin-bottom: 8px;
+      }
+
+      .upload-hint {
+        font-size: 0.9em;
+        color: #777;
+      }
+
+      #file-input {
+        display: none;
+      }
+
+      .gallery {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
+      }
+
+      .gallery-item {
+        aspect-ratio: 2 / 1;
+        border-radius: 4px;
+        cursor: pointer;
+        overflow: hidden;
+        border: 2px solid #333;
+        transition: all 0.3s;
+      }
+
+      .gallery-item:hover {
+        border-color: #0080ff;
+        transform: scale(1.05);
+      }
+
+      .gallery-item canvas {
+        width: 100%;
+        height: 100%;
+      }
+
+      .loading {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(0, 0, 0, 0.8);
+        padding: 20px 40px;
+        border-radius: 8px;
+        display: none;
+        z-index: 1000;
+      }
+
+      .loading.show {
+        display: block;
+      }
+
+      .error {
+        background: rgba(255, 100, 100, 0.1);
+        border: 1px solid #ff6464;
+        color: #ff9999;
+        padding: 15px;
+        border-radius: 4px;
+        margin-top: 15px;
+        display: none;
+      }
+
+      .error.show {
+        display: block;
+      }
+
+      .back-button {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        background: rgba(0, 0, 0, 0.5);
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 1em;
+        display: none;
+        z-index: 100;
+        transition: background 0.3s;
+      }
+
+      .back-button:hover {
+        background: rgba(0, 0, 0, 0.7);
+      }
+
+      .back-button.show {
+        display: block;
+      }
+
+      .info-text {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        right: 20px;
+        font-size: 0.9em;
+        color: #999;
+        text-align: center;
+        display: none;
+        pointer-events: none;
+      }
+
+      .info-text.show {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="welcome">
+      <div class="welcome-content">
+        <h1>panorama-player</h1>
+        <p class="subtitle">WebGL2 equirectangular panorama viewer</p>
+
+        <div class="section">
+          <div class="section-title">Upload Your Image</div>
+          <div id="upload-area">
+            <div class="upload-icon">📁</div>
+            <div class="upload-text">Drag & drop your panorama here</div>
+            <div class="upload-hint">or click to select (2:1 aspect ratio)</div>
+          </div>
+          <input type="file" id="file-input" accept="image/*" />
+          <div id="error" class="error"></div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Or Try Examples</div>
+          <div class="gallery" id="gallery"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="player-container"></div>
+
+    <button class="back-button" id="back-button">← Back</button>
+    <div class="info-text" id="info-text">
+      <strong>Desktop:</strong> Drag to rotate, Ctrl+Scroll to zoom<br />
+      <strong>Mobile:</strong> Drag to rotate, Pinch to zoom
+    </div>
+
+    <div class="loading" id="loading">Loading panorama...</div>
+
+    <script type="module" src="demo.js"></script>
+  </body>
+</html>
