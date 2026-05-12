@@ -1,5 +1,3 @@
-import { PanoramaPlayer } from './dist/index.js';
-
 const welcome = document.getElementById('welcome');
 const playerContainer = document.getElementById('player-container');
 const uploadArea = document.getElementById('upload-area');
@@ -59,7 +57,7 @@ function showPlayer() {
   }
 }
 
-function loadImage(imageSource, attribution = null) {
+async function loadImage(imageSource, attribution = null) {
   showLoading();
   errorEl.classList.remove('show');
   currentAttribution = attribution;
@@ -67,6 +65,8 @@ function loadImage(imageSource, attribution = null) {
 
   try {
     if (!currentPlayer) {
+      const { PanoramaPlayer } = await import('./dist/index.js');
+
       currentPlayer = new PanoramaPlayer({
         wheelModifierRequired: false,
       });
@@ -215,14 +215,13 @@ const examples = [
   },
 ];
 
-examples.forEach(({ name, previewUrl, fullUrl, attribution }) => {
-  const item = document.createElement('div');
-  item.className = 'gallery-item';
+examples.forEach(({ previewUrl, fullUrl, attribution }, idx) => {
+  const item = gallery.children[idx];
 
   const img = document.createElement('img');
   img.src = previewUrl;
-  img.alt = name;
-  img.loading = 'lazy';
+  img.width = 600;
+  img.height = 300;
 
   const attributionEl = document.createElement('div');
   attributionEl.className = 'attribution';
@@ -230,6 +229,7 @@ examples.forEach(({ name, previewUrl, fullUrl, attribution }) => {
 
   item.appendChild(img);
   item.appendChild(attributionEl);
+  item.classList.remove('placeholder');
 
   item.addEventListener('click', () => {
     loadImage(fullUrl, attribution);
@@ -238,6 +238,4 @@ examples.forEach(({ name, previewUrl, fullUrl, attribution }) => {
   attributionEl.addEventListener('click', (e) => {
     e.stopPropagation();
   });
-
-  gallery.appendChild(item);
 });
