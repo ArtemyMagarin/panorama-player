@@ -9,8 +9,15 @@ const loading = document.getElementById('loading');
 const infoText = document.getElementById('info-text');
 const attributionOverlay = document.getElementById('attribution-overlay');
 
+const METRIKA_COUNTER_ID = 109155448;
+
 let currentPlayer = null;
 let currentAttribution = null;
+
+function trackGoal(goal, params) {
+  if (typeof ym === 'undefined') return;
+  ym(METRIKA_COUNTER_ID, 'reachGoal', goal, params);
+}
 
 function showError(message) {
   errorEl.textContent = message;
@@ -63,12 +70,21 @@ async function loadImage(imageSource, attribution = null) {
   currentAttribution = attribution;
   showPlayer();
 
+  trackGoal('view_panorama');
+
   try {
     if (!currentPlayer) {
       const { PanoramaPlayer } = await import('./dist/index.js');
 
       currentPlayer = new PanoramaPlayer({
         wheelModifierRequired: false,
+        events: {
+          onRotateStart: () => trackGoal('rotate_start'),
+          onWheelZoom: () => trackGoal('wheel_zoom'),
+          onPinchZoom: () => trackGoal('pinch_zoom'),
+          onFullscreenEnter: () => trackGoal('fullscreen_enter'),
+          onFullscreenExit: () => trackGoal('fullscreen_exit'),
+        },
       });
       currentPlayer.mount(playerContainer);
     }
@@ -83,22 +99,29 @@ async function loadImage(imageSource, attribution = null) {
     .loadImage(imageSource)
     .then(() => {
       hideLoading();
+      trackGoal('load_success');
     })
     .catch((err) => {
       hideLoading();
       showWelcome();
+      trackGoal('load_error');
       showError(`Failed to load image: ${err.message}`);
     });
 }
 
-uploadArea.addEventListener('click', () => fileInput.click());
+uploadArea.addEventListener('click', () => {
+  trackGoal('upload_image_click');
+  fileInput.click();
+});
 
 fileInput.addEventListener('change', (e) => {
   const file = e.target.files?.[0];
   if (!file) return;
+  trackGoal('select_upload_file');
 
   const validation = validateImage(file);
   if (!validation.valid) {
+    trackGoal('upload_validation_error');
     showError(validation.error);
     return;
   }
@@ -114,14 +137,17 @@ fileInput.addEventListener('change', (e) => {
         );
         return;
       }
+      trackGoal('upload_image_ready');
       loadImage(img);
     };
     img.onerror = () => {
+      trackGoal('upload_image_decode_error');
       showError('Failed to load image');
     };
     img.src = event.target?.result;
   };
   reader.onerror = () => {
+    trackGoal('upload_file_read_error');
     showError('Failed to read file');
   };
   reader.readAsDataURL(file);
@@ -140,11 +166,14 @@ uploadArea.addEventListener('drop', (e) => {
   e.preventDefault();
   uploadArea.classList.remove('drag-over');
 
+  trackGoal('upload_image_drop');
+
   const file = e.dataTransfer?.files?.[0];
   if (!file) return;
 
   const validation = validateImage(file);
   if (!validation.valid) {
+    trackGoal('upload_validation_error');
     showError(validation.error);
     return;
   }
@@ -160,20 +189,26 @@ uploadArea.addEventListener('drop', (e) => {
         );
         return;
       }
+      trackGoal('upload_image_ready');
       loadImage(img);
     };
     img.onerror = () => {
+      trackGoal('upload_image_decode_error');
       showError('Failed to load image');
     };
     img.src = event.target?.result;
   };
   reader.onerror = () => {
+    trackGoal('upload_file_read_error');
     showError('Failed to read file');
   };
   reader.readAsDataURL(file);
 });
 
-backButton.addEventListener('click', showWelcome);
+backButton.addEventListener('click', () => {
+  trackGoal('back_to_welcome');
+  showWelcome();
+});
 
 const examples = [
   {
@@ -232,6 +267,7 @@ examples.forEach(({ previewUrl, fullUrl, attribution }, idx) => {
   item.classList.remove('placeholder');
 
   item.addEventListener('click', () => {
+    trackGoal('select_gallery_image', { index: idx });
     loadImage(fullUrl, attribution);
   });
 
