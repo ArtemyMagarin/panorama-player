@@ -1,5 +1,6 @@
 export interface PointerInputCallbacks {
   onDrag: (dxPx: number, dyPx: number) => void;
+  onDragEnd?: () => void;
   onPinch: (scale: number) => void;
 }
 
@@ -58,6 +59,11 @@ export class PointerInput {
     }
     this.pointers.delete(e.pointerId);
     this.lastPinchDistance = this.pointers.size === 2 ? this.measurePinchDistance() : 0;
+
+    // Call onDragEnd when the last pointer is released
+    if (this.pointers.size === 0) {
+      this.callbacks.onDragEnd?.();
+    }
   };
 
   constructor(element: HTMLElement, callbacks: PointerInputCallbacks) {

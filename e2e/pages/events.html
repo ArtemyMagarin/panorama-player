@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PanoramaPlayer Events Test</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 20px;
+        font-family: sans-serif;
+      }
+      #player-container {
+        width: min(800px, 100%);
+        height: min(600px, 50vh);
+        min-height: 240px;
+        margin-bottom: 20px;
+      }
+      #controls {
+        margin-bottom: 20px;
+      }
+      button {
+        margin-right: 10px;
+        padding: 8px 16px;
+        cursor: pointer;
+      }
+      #event-log {
+        width: 100%;
+        height: 300px;
+        overflow-y: auto;
+        border: 1px solid #ccc;
+        padding: 10px;
+        font-family: monospace;
+        font-size: 12px;
+      }
+      .log-entry {
+        margin-bottom: 4px;
+      }
+      .log-entry .timestamp {
+        color: #666;
+      }
+      .log-entry .event-name {
+        color: #0066cc;
+        font-weight: bold;
+      }
+      .log-entry .payload {
+        color: #333;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>PanoramaPlayer Events Test</h1>
+
+    <div id="player-container"></div>
+
+    <div id="controls">
+      <button id="mount-button">Mount Player</button>
+      <button id="destroy-button">Destroy Player</button>
+      <button id="load-button">Load Image</button>
+      <button id="load-invalid-button">Load Invalid Image</button>
+      <button id="set-view-button">Set View</button>
+      <button id="update-events-button">Update Events</button>
+      <button id="configure-button">Configure</button>
+    </div>
+
+    <h2>Event Log</h2>
+    <div id="event-log"></div>
+
+    <script type="module">
+      import { PanoramaPlayer } from '../../dist/index.js';
+
+      const container = document.getElementById('player-container');
+      const eventLog = document.getElementById('event-log');
+      let player = null;
+
+      function logEvent(eventName, payload) {
+        const entry = document.createElement('div');
+        entry.className = 'log-entry';
+        const timestamp = new Date().toISOString();
+        const payloadStr = payload ? JSON.stringify(payload) : '';
+        entry.innerHTML = `
+        <span class="timestamp">[${timestamp}]</span>
+        <span class="event-name">${eventName}</span>
+        ${payloadStr ? `<span class="payload">: ${payloadStr}</span>` : ''}
+      `;
+        eventLog.appendChild(entry);
+        eventLog.scrollTop = eventLog.scrollHeight;
+      }
+
+      const events = {
+        onMount: (payload) => logEvent('onMount', payload),
+        onUnmount: () => logEvent('onUnmount'),
+        onRotateStart: (payload) => logEvent('onRotateStart', payload),
+        onRotate: (payload) => logEvent('onRotate', payload),
+        onRotateEnd: (payload) => logEvent('onRotateEnd', payload),
+        onWheelZoom: (payload) => logEvent('onWheelZoom', payload),
+        onPinchZoom: (payload) => logEvent('onPinchZoom', payload),
+        onFullscreenEnter: (payload) => logEvent('onFullscreenEnter', payload),
+        onFullscreenExit: () => logEvent('onFullscreenExit'),
+        onResize: (payload) => logEvent('onResize', payload),
+        onLoad: (payload) => logEvent('onLoad', payload),
+        onError: (payload) => logEvent('onError', payload),
+      };
+
+      document.getElementById('mount-button').addEventListener('click', () => {
+        player = new PanoramaPlayer({
+          wheelModifierRequired: false,
+          events,
+        });
+        player.mount(container);
+      });
+
+      document.getElementById('destroy-button').addEventListener('click', () => {
+        if (player) {
+          player.destroy();
+          player = null;
+        }
+      });
+
+      document.getElementById('load-button').addEventListener('click', async () => {
+        if (player) {
+          const img = new Image();
+          img.src = '../fixtures/pano.png';
+          await new Promise((resolve) => {
+            img.onload = resolve;
+          });
+          await player.loadImage(img);
+        }
+      });
+
+      document.getElementById('load-invalid-button').addEventListener('click', async () => {
+        if (player) {
+          try {
+            await player.loadImage('invalid://url');
+          } catch (e) {
+            // Expected to fail
+          }
+        }
+      });
+
+      document.getElementById('set-view-button').addEventListener('click', () => {
+        if (player) {
+          player.setView({ yaw: 90 });
+        }
+      });
+
+      document.getElementById('update-events-button').addEventListener('click', () => {
+        if (player) {
+          player.updateEvents({
+            onRotate: (payload) => logEvent('onRotate (updated)', payload),
+          });
+        }
+      });
+
+      document.getElementById('configure-button').addEventListener('click', () => {
+        if (player) {
+          player.configure({ fovRange: [40, 90] });
+        }
+      });
+    </script>
+  </body>
+</html>

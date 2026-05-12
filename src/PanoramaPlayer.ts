@@ -1,7 +1,13 @@
 import { PointerInput } from './input/PointerInput.js';
 import { WheelInput } from './input/WheelInput.js';
 import { Renderer } from './renderer/Renderer.js';
-import { type PanoramaOptions, type ResolvedOptions, type View, resolveOptions } from './types.js';
+import {
+  type PanoramaOptions,
+  type PanoramaEvents,
+  type ResolvedOptions,
+  type View,
+  resolveOptions,
+} from './types.js';
 import { clamp, wrapDeg } from './utils/clamp.js';
 import { loadImage } from './utils/loadImage.js';
 import { acquireStyles, releaseStyles } from './utils/styles.js';
@@ -39,10 +45,28 @@ export class PanoramaPlayer {
   private fullscreenButton: HTMLElement | null = null;
   private unsubscribeFullscreenChange: (() => void) | null = null;
   private fullscreenToggling = false;
+  private events: PanoramaEvents;
+  private rotateThrottleTimer: number | null = null;
+  private readonly rotateThrottleDelay = 16;
+  private pendingRotatePayload: { view: View; deltaX: number; deltaY: number } | null = null;
+  private rotating = false;
 
   constructor(options?: PanoramaOptions) {
     this.options = resolveOptions(options);
     this.view = { ...this.options.initialView };
+    this.events = options?.events || {};
+  }
+
+  private safeCall<T extends (...args: never[]) => void>(
+    callback: T | undefined,
+    ...args: Parameters<T>
+  ): void {
+    if (!callback) return;
+    try {
+      callback(...args);
+    } catch (error) {
+      console.error('panorama-player: event handler error', error);
+    }
   }
 
   mount(container: HTMLElement): void {
@@ -91,6 +115,7 @@ export class PanoramaPlayer {
 
     this.pointerInput = new PointerInput(this.canvas, {
       onDrag: (dx, dy) => this.applyDrag(dx, dy),
+      onDragEnd: () => this.applyDragEnd(),
       onPinch: (scale) => this.applyPinch(scale),
     });
     this.wheelInput = new WheelInput(
@@ -109,6 +134,8 @@ export class PanoramaPlayer {
     this.handleResize();
     this.dirty = true;
     this.scheduleFrame();
+
+    this.safeCall(this.events.onMount, { container, canvas: this.canvas });
   }
 
   loadImage(src: string | HTMLImageElement): Promise<void> {
@@ -116,12 +143,19 @@ export class PanoramaPlayer {
       return Promise.reject(new Error('panorama-player: mount() before loadImage()'));
     }
     const renderer = this.renderer;
-    return loadImage(src).then((img) => {
-      if (this.destroyed || this.renderer !== renderer) return;
-      renderer.uploadImage(img);
-      this.dirty = true;
-      this.scheduleFrame();
-    });
+    return loadImage(src)
+      .then((img) => {
+        if (this.destroyed || this.renderer !== renderer) return;
+        renderer.uploadImage(img);
+        this.dirty = true;
+        this.scheduleFrame();
+
+        this.safeCall(this.events.onLoad, { image: img, view: { ...this.view } });
+      })
+      .catch((error) => {
+        this.safeCall(this.events.onError, { error, source: src });
+        throw error;
+      });
   }
 
   configure(partial: Partial<PanoramaOptions>): void {
@@ -136,6 +170,13 @@ export class PanoramaPlayer {
     if (view.pitch !== undefined) this.view.pitch = view.pitch;
     if (view.fov !== undefined) this.view.fov = view.fov;
     this.applyConstraints();
+
+    this.safeCall(this.events.onRotate, {
+      view: { ...this.view },
+      deltaX: 0,
+      deltaY: 0,
+    });
+
     this.dirty = true;
     this.scheduleFrame();
   }
@@ -147,6 +188,9 @@ export class PanoramaPlayer {
   destroy(): void {
     if (this.destroyed) return;
     this.destroyed = true;
+
+    this.safeCall(this.events.onUnmount);
+
     if (this.rafHandle) {
       cancelAnimationFrame(this.rafHandle);
       this.rafHandle = 0;
@@ -155,6 +199,7 @@ export class PanoramaPlayer {
       clearTimeout(this.hintTimeout);
       this.hintTimeout = 0;
     }
+    this.clearRotateThrottle();
     this.resizeObserver?.disconnect();
     this.resizeObserver = null;
     this.pointerInput?.dispose();
@@ -175,6 +220,8 @@ export class PanoramaPlayer {
       releaseStyles(this.container.ownerDocument ?? document);
       this.container = null;
     }
+
+    this.events = {};
   }
 
   private optionsAsInput(): PanoramaOptions {
@@ -188,7 +235,12 @@ export class PanoramaPlayer {
       devicePixelRatio: this.options.devicePixelRatio,
       wheelModifierRequired: this.options.wheelModifierRequired,
       fullscreenEnabled: this.options.fullscreenEnabled,
+      events: this.events,
     };
+  }
+
+  updateEvents(events: Partial<PanoramaEvents>): void {
+    this.events = { ...this.events, ...events };
   }
 
   private applyConstraints(): void {
@@ -200,6 +252,12 @@ export class PanoramaPlayer {
 
   private applyDrag(dxPx: number, dyPx: number): void {
     if (!this.canvas) return;
+
+    if (!this.rotating) {
+      this.rotating = true;
+      this.safeCall(this.events.onRotateStart, { view: { ...this.view } });
+    }
+
     const heightPx = this.canvas.clientHeight || 1;
     const fovScale = this.view.fov / heightPx;
     this.view.yaw = wrapDeg(this.view.yaw + dxPx * fovScale * this.options.dragSpeed * 4);
@@ -208,13 +266,61 @@ export class PanoramaPlayer {
       this.options.pitchRange[0],
       this.options.pitchRange[1],
     );
+
+    this.queueRotate({ view: { ...this.view }, deltaX: dxPx, deltaY: dyPx });
+
     this.dirty = true;
     this.scheduleFrame();
+  }
+
+  private applyDragEnd(): void {
+    if (!this.rotating) return;
+    this.flushRotate();
+    this.rotating = false;
+    this.safeCall(this.events.onRotateEnd, { view: { ...this.view } });
+  }
+
+  private queueRotate(payload: { view: View; deltaX: number; deltaY: number }): void {
+    if (!this.events.onRotate) return;
+
+    if (!this.rotateThrottleTimer) {
+      this.safeCall(this.events.onRotate, payload);
+      this.rotateThrottleTimer = window.setTimeout(
+        () => this.flushRotate(),
+        this.rotateThrottleDelay,
+      );
+      return;
+    }
+
+    this.pendingRotatePayload = payload;
+  }
+
+  private flushRotate(): void {
+    if (this.rotateThrottleTimer) {
+      clearTimeout(this.rotateThrottleTimer);
+      this.rotateThrottleTimer = null;
+    }
+
+    const payload = this.pendingRotatePayload;
+    this.pendingRotatePayload = null;
+    if (payload) this.safeCall(this.events.onRotate, payload);
+  }
+
+  private clearRotateThrottle(): void {
+    if (this.rotateThrottleTimer) {
+      clearTimeout(this.rotateThrottleTimer);
+      this.rotateThrottleTimer = null;
+    }
+    this.pendingRotatePayload = null;
+    this.rotating = false;
   }
 
   private applyPinch(scale: number): void {
     const next = this.view.fov / Math.pow(scale, this.options.pinchSpeed);
     this.view.fov = clamp(next, this.options.fovRange[0], this.options.fovRange[1]);
+
+    this.safeCall(this.events.onPinchZoom, { fov: this.view.fov, scale });
+
     this.dirty = true;
     this.scheduleFrame();
   }
@@ -223,6 +329,9 @@ export class PanoramaPlayer {
     const next = this.view.fov + deltaY * this.options.zoomSpeed;
     this.view.fov = clamp(next, this.options.fovRange[0], this.options.fovRange[1]);
     this.hideHint();
+
+    this.safeCall(this.events.onWheelZoom, { fov: this.view.fov, deltaY });
+
     this.dirty = true;
     this.scheduleFrame();
   }
@@ -254,6 +363,12 @@ export class PanoramaPlayer {
     const w = Math.max(1, Math.floor(this.root.clientWidth * dpr));
     const h = Math.max(1, Math.floor(this.root.clientHeight * dpr));
     this.renderer.resize(w, h);
+    this.safeCall(this.events.onResize, {
+      width: this.root.clientWidth,
+      height: this.root.clientHeight,
+      dpr,
+    });
+
     this.dirty = true;
     this.scheduleFrame();
   }
@@ -277,13 +392,21 @@ export class PanoramaPlayer {
     };
     if (isFullscreen()) {
       exitFullscreen()
-        .then(cleanup)
+        .then(() => {
+          this.safeCall(this.events.onFullscreenExit);
+          cleanup();
+        })
         .catch(() => {
           cleanup();
         });
     } else {
       requestFullscreen(this.root)
-        .then(cleanup)
+        .then(() => {
+          if (this.root) {
+            this.safeCall(this.events.onFullscreenEnter, { element: this.root });
+          }
+          cleanup();
+        })
         .catch(() => {
           cleanup();
         });

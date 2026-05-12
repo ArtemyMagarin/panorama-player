@@ -47,6 +47,7 @@ player.destroy();
 | `setView({ yaw?, pitch?, fov? })` | Imperatively set the view; values are clamped/wrapped.                     |
 | `getView()`                       | Returns current `{ yaw, pitch, fov }` (degrees).                           |
 | `configure(partial)`              | Update options at runtime; constraints reapplied.                          |
+| `updateEvents(partial)`           | Merge runtime event callback updates into existing handlers.               |
 | `destroy()`                       | Detach listeners, dispose WebGL resources, remove canvas.                  |
 
 ### Options
@@ -62,8 +63,26 @@ interface PanoramaOptions {
   devicePixelRatio?: number; // default min(window.devicePixelRatio, 2)
   wheelModifierRequired?: boolean; // default true; if true, wheel zoom requires Ctrl/Cmd key
   fullscreenEnabled?: boolean; // default true; if true, shows fullscreen button when supported
+  events?: PanoramaEvents;
+}
+
+interface PanoramaEvents {
+  onMount?: (payload: { container: HTMLElement; canvas: HTMLCanvasElement }) => void;
+  onUnmount?: () => void;
+  onRotateStart?: (payload: { view: View }) => void;
+  onRotate?: (payload: { view: View; deltaX: number; deltaY: number }) => void;
+  onRotateEnd?: (payload: { view: View }) => void;
+  onWheelZoom?: (payload: { fov: number; deltaY: number }) => void;
+  onPinchZoom?: (payload: { fov: number; scale: number }) => void;
+  onFullscreenEnter?: (payload: { element: HTMLElement }) => void;
+  onFullscreenExit?: () => void;
+  onResize?: (payload: { width: number; height: number; dpr: number }) => void;
+  onLoad?: (payload: { image: HTMLImageElement; view: View }) => void;
+  onError?: (payload: { error: Error; source: string | HTMLImageElement }) => void;
 }
 ```
+
+Event callbacks are isolated from the render loop: thrown errors are caught and logged. `onRotate` is throttled during drag and is also emitted by `setView()` with zero deltas.
 
 ## Multiple instances
 

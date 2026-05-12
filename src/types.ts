@@ -4,6 +4,21 @@ export interface View {
   fov: number;
 }
 
+export interface PanoramaEvents {
+  onMount?: (payload: { container: HTMLElement; canvas: HTMLCanvasElement }) => void;
+  onUnmount?: () => void;
+  onRotateStart?: (payload: { view: View }) => void;
+  onRotate?: (payload: { view: View; deltaX: number; deltaY: number }) => void;
+  onRotateEnd?: (payload: { view: View }) => void;
+  onWheelZoom?: (payload: { fov: number; deltaY: number }) => void;
+  onPinchZoom?: (payload: { fov: number; scale: number }) => void;
+  onFullscreenEnter?: (payload: { element: HTMLElement }) => void;
+  onFullscreenExit?: () => void;
+  onResize?: (payload: { width: number; height: number; dpr: number }) => void;
+  onLoad?: (payload: { image: HTMLImageElement; view: View }) => void;
+  onError?: (payload: { error: Error; source: string | HTMLImageElement }) => void;
+}
+
 export interface PanoramaOptions {
   initialView?: Partial<View>;
   fovRange?: [number, number];
@@ -14,6 +29,7 @@ export interface PanoramaOptions {
   devicePixelRatio?: number;
   wheelModifierRequired?: boolean;
   fullscreenEnabled?: boolean;
+  events?: PanoramaEvents;
 }
 
 export interface ResolvedOptions {
