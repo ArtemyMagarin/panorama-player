@@ -1,155 +1,155 @@
 [
-    {
-        "name": "View panorama",
-        "conditions": [
-            {
-                "type": "exact",
-                "url": "view_panorama"
-            }
-        ]
-    },
-    {
-        "name": "Rotate start",
-        "conditions": [
-            {
-                "type": "exact",
-                "url": "rotate_start"
-            }
-        ]
-    },
-    {
-        "name": "Wheel zoom",
-        "conditions": [
-            {
-                "type": "exact",
-                "url": "wheel_zoom"
-            }
-        ]
-    },
-    {
-        "name": "Pinch zoom",
-        "conditions": [
-            {
-                "type": "exact",
-                "url": "pinch_zoom"
-            }
-        ]
-    },
-    {
-        "name": "Fullscreen enter",
-        "conditions": [
-            {
-                "type": "exact",
-                "url": "fullscreen_enter"
-            }
-        ]
-    },
-    {
-        "name": "Fullscreen exit",
-        "conditions": [
-            {
-                "type": "exact",
-                "url": "fullscreen_exit"
-            }
-        ]
-    },
-    {
-        "name": "Load success",
-        "conditions": [
-            {
-                "type": "exact",
-                "url": "load_success"
-            }
-        ]
-    },
-    {
-        "name": "Load error",
-        "conditions": [
-            {
-                "type": "exact",
-                "url": "load_error"
-            }
-        ]
-    },
-    {
-        "name": "Upload image click",
-        "conditions": [
-            {
-                "type": "exact",
-                "url": "upload_image_click"
-            }
-        ]
-    },
-    {
-        "name": "Select upload file",
-        "conditions": [
-            {
-                "type": "exact",
-                "url": "select_upload_file"
-            }
-        ]
-    },
-    {
-        "name": "Upload validation error",
-        "conditions": [
-            {
-                "type": "exact",
-                "url": "upload_validation_error"
-            }
-        ]
-    },
-    {
-        "name": "Upload image ready",
-        "conditions": [
-            {
-                "type": "exact",
-                "url": "upload_image_ready"
-            }
-        ]
-    },
-    {
-        "name": "Upload image decode error",
-        "conditions": [
-            {
-                "type": "exact",
-                "url": "upload_image_decode_error"
-            }
-        ]
-    },
-    {
-        "name": "Upload file read error",
-        "conditions": [
-            {
-                "type": "exact",
-                "url": "upload_file_read_error"
-            }
-        ]
-    },
-    {
-        "name": "Upload image drop",
-        "conditions": [
-            {
-                "type": "exact",
-                "url": "upload_image_drop"
-            }
-        ]
-    },
-    {
-        "name": "Back to welcome",
-        "conditions": [
-            {
-                "type": "exact",
-                "url": "back_to_welcome"
-            }
-        ]
-    },
-    {
-        "name": "Select gallery image",
-        "conditions": [
-            {
-                "type": "exact",
-                "url": "select_gallery_image"
-            }
-        ]
-    }
+  {
+    "name": "View panorama",
+    "conditions": [
+      {
+        "type": "exact",
+        "url": "view_panorama"
+      }
+    ]
+  },
+  {
+    "name": "Rotate start",
+    "conditions": [
+      {
+        "type": "exact",
+        "url": "rotate_start"
+      }
+    ]
+  },
+  {
+    "name": "Wheel zoom",
+    "conditions": [
+      {
+        "type": "exact",
+        "url": "wheel_zoom"
+      }
+    ]
+  },
+  {
+    "name": "Pinch zoom",
+    "conditions": [
+      {
+        "type": "exact",
+        "url": "pinch_zoom"
+      }
+    ]
+  },
+  {
+    "name": "Fullscreen enter",
+    "conditions": [
+      {
+        "type": "exact",
+        "url": "fullscreen_enter"
+      }
+    ]
+  },
+  {
+    "name": "Fullscreen exit",
+    "conditions": [
+      {
+        "type": "exact",
+        "url": "fullscreen_exit"
+      }
+    ]
+  },
+  {
+    "name": "Load success",
+    "conditions": [
+      {
+        "type": "exact",
+        "url": "load_success"
+      }
+    ]
+  },
+  {
+    "name": "Load error",
+    "conditions": [
+      {
+        "type": "exact",
+        "url": "load_error"
+      }
+    ]
+  },
+  {
+    "name": "Upload image click",
+    "conditions": [
+      {
+        "type": "exact",
+        "url": "upload_image_click"
+      }
+    ]
+  },
+  {
+    "name": "Select upload file",
+    "conditions": [
+      {
+        "type": "exact",
+        "url": "select_upload_file"
+      }
+    ]
+  },
+  {
+    "name": "Upload validation error",
+    "conditions": [
+      {
+        "type": "exact",
+        "url": "upload_validation_error"
+      }
+    ]
+  },
+  {
+    "name": "Upload image ready",
+    "conditions": [
+      {
+        "type": "exact",
+        "url": "upload_image_ready"
+      }
+    ]
+  },
+  {
+    "name": "Upload image decode error",
+    "conditions": [
+      {
+        "type": "exact",
+        "url": "upload_image_decode_error"
+      }
+    ]
+  },
+  {
+    "name": "Upload file read error",
+    "conditions": [
+      {
+        "type": "exact",
+        "url": "upload_file_read_error"
+      }
+    ]
+  },
+  {
+    "name": "Upload image drop",
+    "conditions": [
+      {
+        "type": "exact",
+        "url": "upload_image_drop"
+      }
+    ]
+  },
+  {
+    "name": "Back to welcome",
+    "conditions": [
+      {
+        "type": "exact",
+        "url": "back_to_welcome"
+      }
+    ]
+  },
+  {
+    "name": "Select gallery image",
+    "conditions": [
+      {
+        "type": "exact",
+        "url": "select_gallery_image"
+      }
+    ]
+  }
 ]
