@@ -30,7 +30,8 @@
     "e2e:install": "playwright install --with-deps",
     "e2e:fixture": "node e2e/scripts/generate-fixture.mjs",
     "prepublishOnly": "pnpm run typecheck && pnpm run lint && pnpm run format:check && pnpm run test && pnpm run build && pnpm run size",
-    "demo": "pnpm build && rm -rf demo/dist && cp -r dist demo && npx serve demo"
+    "build:demo": "pnpm build && node scripts/build-demo.mjs",
+    "demo": "pnpm build:demo && npx serve demo"
   },
   "keywords": [
     "panorama",

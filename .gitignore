@@ -9,3 +9,4 @@ test-results/
 .vscode/
 tasks/
 .claude/settings.local.json
+demo/index.html
