@@ -244,22 +244,34 @@ export class PanoramaPlayer {
   }
 
   private disposeSingleImageMode(): void {
-    // Single image mode doesn't need explicit cleanup
-    // The renderer will handle texture replacement
+    // Clear the single-image texture from GPU when switching to tile mode
+    if (this.renderer) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 1;
+      canvas.height = 1;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.clearRect(0, 0, 1, 1);
+        const img = new Image();
+        img.src = canvas.toDataURL();
+        img.onload = () => {
+          this.renderer?.uploadImage(img);
+        };
+      }
+    }
   }
 
   configure(partial: Partial<PanoramaOptions>): void {
-    // Guard against mode switching
+    // Handle mode switching if tiles option changes
     if (partial.tiles !== undefined) {
       if (this.tileMode && !partial.tiles) {
-        throw new Error(
-          'panorama-player: cannot disable tile mode via configure(); recreate the player instance',
-        );
-      }
-      if (!this.tileMode && partial.tiles) {
-        throw new Error(
-          'panorama-player: cannot switch to tile mode via configure(); recreate the player instance',
-        );
+        // Switching from tile mode to single image mode
+        this.disposeTileMode();
+      } else if (!this.tileMode && partial.tiles) {
+        // Switching from single image to tile mode
+        this.disposeSingleImageMode();
+        this.tileMode = true;
+        // Note: actual tile loading happens via loadTiles() call
       }
     }
 

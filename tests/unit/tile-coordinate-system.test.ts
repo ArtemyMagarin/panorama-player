@@ -64,7 +64,7 @@ describe('TileCoordinateSystem', () => {
       expect(tile.y).toBe(0);
     });
 
-    it('should map UV (0.5,0.5) to tile (2,1,1)', () => {
+    it('should map UV (0.5,0.5) to tile (4,2,1)', () => {
       const tile = TileCoordinateSystem.uvToTile(1, 0.5, 0.5);
       expect(tile.x).toBe(4);
       expect(tile.y).toBe(2);
