@@ -332,7 +332,9 @@ export class TileManager {
     this.loadQueue = [];
     this.loadQueueKeys.clear();
     // Resolve all parked waiters so they don't leak
+    // Pre-claim slots to match releaseSlot's contract
     for (const resolve of this.waitQueue) {
+      this.activeRequests++;
       resolve();
     }
     this.waitQueue = [];
