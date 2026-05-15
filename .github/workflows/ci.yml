@@ -113,6 +113,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           skip_step: install
           build_script: build
+          skip_comment: true
 
   e2e:
     name: E2E Tests
