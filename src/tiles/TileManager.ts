@@ -23,6 +23,7 @@ export class TileManager {
   private viewport: ViewportInfo;
   private activeRequests = 0;
   private loadQueue: Tile[] = [];
+  private loadQueueKeys = new Set<string>();
   private isProcessingQueue = false;
 
   // Event callbacks
@@ -112,10 +113,11 @@ export class TileManager {
       this.config.maxZoom,
     );
 
-    // Filter out already loaded tiles
+    // Filter out already loaded tiles and tiles already in queue
     const tilesNeedingLoad = tilesToLoad.filter((tile) => {
       const cached = this.cache.get(tile);
-      return !cached || cached.state === 'error';
+      const tileKey = TileCoordinateSystem.getTileKey(tile);
+      return (!cached || cached.state === 'error') && !this.loadQueueKeys.has(tileKey);
     });
 
     if (tilesNeedingLoad.length === 0) {
@@ -129,8 +131,11 @@ export class TileManager {
       return distA - distB;
     });
 
-    // Add to queue
-    this.loadQueue.push(...tilesNeedingLoad);
+    // Add to queue and track keys for deduplication
+    for (const tile of tilesNeedingLoad) {
+      this.loadQueue.push(tile);
+      this.loadQueueKeys.add(TileCoordinateSystem.getTileKey(tile));
+    }
 
     // Start processing queue if not already processing
     if (!this.isProcessingQueue) {
@@ -158,6 +163,8 @@ export class TileManager {
       }
 
       const tile = this.loadQueue.shift()!;
+      const tileKey = TileCoordinateSystem.getTileKey(tile);
+      this.loadQueueKeys.delete(tileKey);
       this.activeRequests++;
 
       // Load tile
@@ -294,6 +301,7 @@ export class TileManager {
   cancelAll(): void {
     this.loader.cancelAll();
     this.loadQueue = [];
+    this.loadQueueKeys.clear();
   }
 
   /**
