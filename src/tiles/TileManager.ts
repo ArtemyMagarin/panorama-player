@@ -24,6 +24,7 @@ export class TileManager {
   private activeRequests = 0;
   private loadQueue: Tile[] = [];
   private loadQueueKeys = new Set<string>();
+  private waitQueue: Array<() => void> = [];
   private isProcessingQueue = false;
   private isDisposed = false;
 
@@ -144,6 +145,30 @@ export class TileManager {
   }
 
   /**
+   * Acquire a slot in the concurrency semaphore
+   */
+  private async acquireSlot(): Promise<void> {
+    if (this.activeRequests < this.config.maxConcurrentRequests) {
+      this.activeRequests++;
+      return Promise.resolve();
+    }
+    // No slot available — park here until one is released
+    return new Promise((resolve) => this.waitQueue.push(resolve));
+  }
+
+  /**
+   * Release a slot in the concurrency semaphore
+   */
+  private releaseSlot(): void {
+    this.activeRequests--;
+    const next = this.waitQueue.shift();
+    if (next) {
+      this.activeRequests++; // pre-claim the slot for the waiter
+      next(); // wake it up
+    }
+  }
+
+  /**
    * Process the loading queue with concurrency limit
    */
   private async processQueue(): Promise<void> {
@@ -155,24 +180,23 @@ export class TileManager {
 
     const totalTiles = this.loadQueue.length;
     let loadedCount = 0;
+    const inFlightPromises: Promise<void>[] = [];
 
     while (this.loadQueue.length > 0 && !this.isDisposed) {
-      // Wait for available request slot
-      while (this.activeRequests >= this.config.maxConcurrentRequests && !this.isDisposed) {
-        await new Promise((resolve) => setTimeout(resolve, 100));
-      }
+      // Wait for available request slot using semaphore
+      await this.acquireSlot();
 
       if (this.isDisposed) {
+        this.releaseSlot();
         break;
       }
 
       const tile = this.loadQueue.shift()!;
       const tileKey = TileCoordinateSystem.getTileKey(tile);
       this.loadQueueKeys.delete(tileKey);
-      this.activeRequests++;
 
-      // Load tile
-      this.loadTile(tile)
+      // Load tile and track the promise
+      const loadPromise = this.loadTile(tile)
         .then(() => {
           loadedCount++;
           if (this.onLoadProgress) {
@@ -192,13 +216,15 @@ export class TileManager {
           }
         })
         .finally(() => {
-          this.activeRequests--;
+          this.releaseSlot();
         });
+
+      inFlightPromises.push(loadPromise);
     }
 
     // Wait for all active requests to complete (unless disposed)
-    while (this.activeRequests > 0 && !this.isDisposed) {
-      await new Promise((resolve) => setTimeout(resolve, 100));
+    if (!this.isDisposed && inFlightPromises.length > 0) {
+      await Promise.all(inFlightPromises);
     }
 
     this.isProcessingQueue = false;
@@ -305,6 +331,11 @@ export class TileManager {
     this.loader.cancelAll();
     this.loadQueue = [];
     this.loadQueueKeys.clear();
+    // Resolve all parked waiters so they don't leak
+    for (const resolve of this.waitQueue) {
+      resolve();
+    }
+    this.waitQueue = [];
   }
 
   /**
