@@ -19,3 +19,5 @@ export type {
 export { TileState } from './types.js';
 export { TileCoordinateSystem } from './TileCoordinateSystem.js';
 export { TileLoader } from './TileLoader.js';
+export { TileCache } from './TileCache.js';
+export { TileManager } from './TileManager.js';
