@@ -9,7 +9,7 @@ module.exports = [
   },
   {
     name: 'PanoramaPlayer Tiles ESM (gzip)',
-    path: 'dist/tiles.js',
+    path: 'dist/tiles/index.js',
     import: '{ TileCoordinateSystem, TileLoader }',
     limit: '14 KB',
     gzip: true,
