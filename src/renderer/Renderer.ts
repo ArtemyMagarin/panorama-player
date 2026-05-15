@@ -146,6 +146,32 @@ export class Renderer {
     }
   }
 
+  clearTexture(): void {
+    const gl = this.gl;
+    if (gl.isContextLost()) {
+      this.contextLost = true;
+      return;
+    }
+    try {
+      gl.bindTexture(gl.TEXTURE_2D, this.texture);
+      gl.texImage2D(
+        gl.TEXTURE_2D,
+        0,
+        gl.RGBA,
+        1,
+        1,
+        0,
+        gl.RGBA,
+        gl.UNSIGNED_BYTE,
+        new Uint8Array([0, 0, 0, 0]),
+      );
+      this.hasImage = false;
+    } catch (e) {
+      this.contextLost = true;
+      throw e;
+    }
+  }
+
   resize(width: number, height: number): void {
     const gl = this.gl;
     const canvas = gl.canvas as HTMLCanvasElement;
