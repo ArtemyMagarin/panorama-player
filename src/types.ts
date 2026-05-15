@@ -1,3 +1,5 @@
+import type { TileOptions } from './tiles/types.js';
+
 export interface View {
   yaw: number;
   pitch: number;
@@ -23,16 +25,7 @@ export interface PanoramaEvents {
   onTileError?: (payload: { error: Error; tile: { z: number; x: number; y: number } }) => void;
 }
 
-export interface TileOptions {
-  baseUrl: string;
-  minZoom: number;
-  maxZoom: number;
-  tileSize: number;
-  cacheSize: number;
-  preloadRadius: number;
-  maxConcurrentRequests: number;
-  adaptiveZoom: boolean;
-}
+export type { TileOptions };
 
 export interface PanoramaOptions {
   initialView?: Partial<View>;

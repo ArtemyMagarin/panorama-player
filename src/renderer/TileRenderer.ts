@@ -15,6 +15,10 @@ export class TileRenderer {
   private geometry: SphereGeometry | null = null;
   private currentZoom: number = 0;
 
+  // Attribute locations
+  private aPosition: number = -1;
+  private aUV: number = -1;
+
   // Uniform locations
   private uViewProjection: WebGLUniformLocation | null = null;
   private uTexture: WebGLUniformLocation | null = null;
@@ -57,6 +61,10 @@ export class TileRenderer {
       const error = this.gl.getProgramInfoLog(this.program);
       throw new Error(`Failed to link shader program: ${error}`);
     }
+
+    // Get attribute locations
+    this.aPosition = this.gl.getAttribLocation(this.program, 'aPosition');
+    this.aUV = this.gl.getAttribLocation(this.program, 'aUV');
 
     // Get uniform locations
     this.uViewProjection = this.gl.getUniformLocation(this.program, 'uViewProjection');
@@ -130,14 +138,12 @@ export class TileRenderer {
 
     // Set up vertex attributes
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.positionBuffer);
-    const positionLoc = this.gl.getAttribLocation(this.program, 'aPosition');
-    this.gl.enableVertexAttribArray(positionLoc);
-    this.gl.vertexAttribPointer(positionLoc, 3, this.gl.FLOAT, false, 0, 0);
+    this.gl.enableVertexAttribArray(this.aPosition);
+    this.gl.vertexAttribPointer(this.aPosition, 3, this.gl.FLOAT, false, 0, 0);
 
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.uvBuffer);
-    const uvLoc = this.gl.getAttribLocation(this.program, 'aUV');
-    this.gl.enableVertexAttribArray(uvLoc);
-    this.gl.vertexAttribPointer(uvLoc, 2, this.gl.FLOAT, false, 0, 0);
+    this.gl.enableVertexAttribArray(this.aUV);
+    this.gl.vertexAttribPointer(this.aUV, 2, this.gl.FLOAT, false, 0, 0);
 
     this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
 

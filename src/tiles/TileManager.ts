@@ -203,7 +203,7 @@ export class TileManager {
 
     this.isProcessingQueue = false;
 
-    if (this.onLoadComplete) {
+    if (!this.isDisposed && this.onLoadComplete) {
       this.onLoadComplete();
     }
   }
@@ -226,7 +226,6 @@ export class TileManager {
       lastAccess: Date.now(),
       loadPromise: null,
       abortController: null,
-      retryCount: 0,
     };
 
     this.cache.set(tile, cachedTile);

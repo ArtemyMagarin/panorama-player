@@ -82,7 +82,6 @@ export interface CachedTile {
   lastAccess: number;
   loadPromise: Promise<void> | null;
   abortController: AbortController | null;
-  retryCount: number;
 }
 
 /**

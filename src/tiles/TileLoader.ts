@@ -83,11 +83,12 @@ export class TileLoader {
 
   /**
    * Validate tile dimensions
+   * Edge tiles may be smaller than expectedSize, so we use >= comparison
    */
   private validateTile(image: HTMLImageElement, expectedSize: number): void {
-    if (image.width !== expectedSize || image.height !== expectedSize) {
+    if (image.width > expectedSize || image.height > expectedSize) {
       throw new Error(
-        `Tile size mismatch: expected ${expectedSize}x${expectedSize}, got ${image.width}x${image.height}`,
+        `Tile size exceeds maximum: expected <= ${expectedSize}x${expectedSize}, got ${image.width}x${image.height}`,
       );
     }
   }

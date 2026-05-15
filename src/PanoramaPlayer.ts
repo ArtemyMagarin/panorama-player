@@ -145,9 +145,14 @@ export class PanoramaPlayer {
 
     // Auto-load tiles if tiles option is provided
     if (this.options.tiles) {
-      this.loadTiles(this.options.tiles).catch((error) => {
-        this.safeCall(this.events.onError, { error, source: 'tiles' });
-      });
+      try {
+        this.loadTiles(this.options.tiles);
+      } catch (error) {
+        this.safeCall(this.events.onError, {
+          error: error instanceof Error ? error : new Error(String(error)),
+          source: 'tiles',
+        });
+      }
     }
 
     this.safeCall(this.events.onMount, { container, canvas: this.canvas });
@@ -179,9 +184,9 @@ export class PanoramaPlayer {
       });
   }
 
-  loadTiles(config: TileOptions): Promise<void> {
+  loadTiles(config: TileOptions): void {
     if (!this.renderer) {
-      return Promise.reject(new Error('panorama-player: mount() before loadTiles()'));
+      throw new Error('panorama-player: mount() before loadTiles()');
     }
 
     // Dispose of single image mode if switching from single image to tiles
@@ -214,8 +219,6 @@ export class PanoramaPlayer {
 
     // Start loading tiles for current view
     this.loadTilesForCurrentView();
-
-    return Promise.resolve();
   }
 
   private loadTilesForCurrentView(): void {

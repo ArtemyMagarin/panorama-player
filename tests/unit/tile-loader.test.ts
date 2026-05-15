@@ -119,8 +119,8 @@ describe('TileLoader', () => {
       global.Image = class extends Image {
         constructor() {
           super();
-          (this as any).width = 128; // Wrong size
-          (this as any).height = 128;
+          (this as any).width = 1024; // Larger than expected 512
+          (this as any).height = 1024;
           setTimeout(() => {
             (this as any).onload?.();
           }, 0);
@@ -134,7 +134,9 @@ describe('TileLoader', () => {
 
       mockFetch.mockResolvedValueOnce(mockResponse);
 
-      await expect(loader.loadTile({ z: 0, x: 0, y: 0 })).rejects.toThrow('Tile size mismatch');
+      await expect(loader.loadTile({ z: 0, x: 0, y: 0 })).rejects.toThrow(
+        'Tile size exceeds maximum',
+      );
     });
 
     it('should build correct URL from template', async () => {
