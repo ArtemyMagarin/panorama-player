@@ -110,7 +110,6 @@ export class TileManager {
     const tilesToLoad = TileCoordinateSystem.getTilesWithinRadius(
       visibleTiles,
       this.config.preloadRadius,
-      this.config.maxZoom,
     );
 
     // Filter out already loaded tiles and tiles already in queue

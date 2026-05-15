@@ -108,9 +108,9 @@ export class TileCoordinateSystem {
 
   /**
    * Get tiles within a Chebyshev distance (L∞) from a set of tiles
-   * Used for preloading adjacent tiles
+   * Used for preloading adjacent tiles at the same zoom level
    */
-  static getTilesWithinRadius(centerTiles: Tile[], radius: number, _maxZ: number): Tile[] {
+  static getTilesWithinRadius(centerTiles: Tile[], radius: number): Tile[] {
     const tilesSet = new Set<string>();
     const result: Tile[] = [];
 
