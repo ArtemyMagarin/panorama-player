@@ -6,6 +6,9 @@ export interface SphereGeometry {
   indexCount: number;
 }
 
+/**
+ * Build a sphere geometry with fixed subdivision
+ */
 export function buildSphere(latBands = 32, lonBands = 64, radius = 1): SphereGeometry {
   const vertCount = (latBands + 1) * (lonBands + 1);
   const positions = new Float32Array(vertCount * 3);
@@ -58,4 +61,15 @@ export function buildSphere(latBands = 32, lonBands = 64, radius = 1): SphereGeo
     vertexCount: vertCount,
     indexCount: idxCount,
   };
+}
+
+/**
+ * Build a zoom-aware sphere geometry for tile-based rendering
+ * At zoom level z, creates 2*2^z latitude bands and 4*2^z longitude bands
+ * Each grid cell maps to exactly one tile
+ */
+export function buildZoomAwareSphere(zoom: number, radius = 1): SphereGeometry {
+  const latBands = 2 * Math.pow(2, zoom);
+  const lonBands = 4 * Math.pow(2, zoom);
+  return buildSphere(latBands, lonBands, radius);
 }
