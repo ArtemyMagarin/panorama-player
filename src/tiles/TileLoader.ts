@@ -65,9 +65,19 @@ export class TileLoader {
   private decodeImage(blob: Blob): Promise<HTMLImageElement> {
     return new Promise((resolve, reject) => {
       const image = new Image();
-      image.onload = () => resolve(image);
-      image.onerror = () => reject(new Error('Failed to decode tile image'));
-      image.src = URL.createObjectURL(blob);
+      const url = URL.createObjectURL(blob);
+
+      image.onload = () => {
+        URL.revokeObjectURL(url);
+        resolve(image);
+      };
+
+      image.onerror = () => {
+        URL.revokeObjectURL(url);
+        reject(new Error('Failed to decode tile image'));
+      };
+
+      image.src = url;
     });
   }
 

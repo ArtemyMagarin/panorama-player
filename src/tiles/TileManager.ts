@@ -20,6 +20,7 @@ export class TileManager {
   private cache: TileCache;
   private gl: WebGLRenderingContext | WebGL2RenderingContext;
   private currentZoom: number;
+  private viewport: ViewportInfo;
   private activeRequests = 0;
   private loadQueue: Tile[] = [];
   private isProcessingQueue = false;
@@ -39,6 +40,7 @@ export class TileManager {
     this.config = config;
     this.loader = new TileLoader(config);
     this.cache = new TileCache(gl, config);
+    this.viewport = initialViewport;
     this.currentZoom = config.adaptiveZoom
       ? TileCoordinateSystem.calculateOptimalZoom(initialViewport, config.tileSize, config.maxZoom)
       : config.minZoom;
@@ -63,6 +65,8 @@ export class TileManager {
    * Update viewport and recalculate optimal zoom if adaptive
    */
   updateViewport(viewport: ViewportInfo): void {
+    this.viewport = viewport;
+
     if (this.config.adaptiveZoom) {
       const newZoom = TileCoordinateSystem.calculateOptimalZoom(
         viewport,
@@ -82,9 +86,10 @@ export class TileManager {
    * Get tiles visible in the current viewport
    */
   getVisibleTiles(viewU: number, viewV: number, fov: number): Tile[] {
-    // Calculate visible UV range based on FOV
+    // Calculate visible UV range based on FOV and actual viewport aspect ratio
+    const aspectRatio = this.viewport.width / this.viewport.height;
     const fovU = fov / 360;
-    const fovV = (fov * 0.75) / 180; // Assume 4:3 aspect ratio
+    const fovV = fov / aspectRatio / 180;
 
     const minU = Math.max(0, viewU - fovU / 2);
     const maxU = Math.min(1, viewU + fovU / 2);

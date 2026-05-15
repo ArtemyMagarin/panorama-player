@@ -209,8 +209,10 @@ void main() {
   // Remap world UV to tile-local UV
   vec2 tileUV = (vUV - uTileOrigin) * uTilesPerAxis;
   
-  // Clamp to tile boundaries to prevent bleeding
-  tileUV = clamp(tileUV, 0.0, 1.0);
+  // Discard fragments outside tile boundaries
+  if (tileUV.x < 0.0 || tileUV.x > 1.0 || tileUV.y < 0.0 || tileUV.y > 1.0) {
+    discard;
+  }
   
   vec4 color = texture(uTexture, tileUV);
   outColor = vec4(color.rgb, color.a * uAlpha);
@@ -257,8 +259,10 @@ void main() {
   // Remap world UV to tile-local UV
   vec2 tileUV = (vUV - uTileOrigin) * uTilesPerAxis;
   
-  // Clamp to tile boundaries to prevent bleeding
-  tileUV = clamp(tileUV, 0.0, 1.0);
+  // Discard fragments outside tile boundaries
+  if (tileUV.x < 0.0 || tileUV.x > 1.0 || tileUV.y < 0.0 || tileUV.y > 1.0) {
+    discard;
+  }
   
   vec4 color = texture2D(uTexture, tileUV);
   gl_FragColor = vec4(color.rgb, color.a * uAlpha);
