@@ -58,7 +58,6 @@ export class PanoramaPlayer {
   private tileManager: TileManager | null = null;
   private tileRenderer: TileRenderer | null = null;
   private tileMode = false;
-  private tileConfig: TileOptions | null = null;
 
   constructor(options?: PanoramaOptions) {
     this.options = resolveOptions(options);
@@ -191,7 +190,6 @@ export class PanoramaPlayer {
     }
 
     this.tileMode = true;
-    this.tileConfig = config;
 
     // Initialize tile manager and renderer
     const gl = this.renderer.glContext;
@@ -240,7 +238,6 @@ export class PanoramaPlayer {
       this.tileRenderer = null;
     }
     this.tileMode = false;
-    this.tileConfig = null;
   }
 
   private disposeSingleImageMode(): void {

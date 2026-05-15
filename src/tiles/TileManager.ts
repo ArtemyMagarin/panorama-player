@@ -82,9 +82,6 @@ export class TileManager {
    * Get tiles visible in the current viewport
    */
   getVisibleTiles(viewU: number, viewV: number, fov: number): Tile[] {
-    const _tilesX = TileCoordinateSystem.getTilesX(this.currentZoom);
-    const _tilesY = TileCoordinateSystem.getTilesY(this.currentZoom);
-
     // Calculate visible UV range based on FOV
     const fovU = fov / 360;
     const fovV = (fov * 0.75) / 180; // Assume 4:3 aspect ratio
