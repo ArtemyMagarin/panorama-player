@@ -44,6 +44,7 @@ player.destroy();
 | `new PanoramaPlayer(options?)`    | Construct an unmounted player.                                             |
 | `mount(container)`                | Insert canvas into `container`, attach input listeners, start render loop. |
 | `loadImage(src)`                  | Load `string \| HTMLImageElement` and upload as the panorama texture.      |
+| `loadTiles(config)`               | Load panorama using tile-based system for high-resolution images.          |
 | `setView({ yaw?, pitch?, fov? })` | Imperatively set the view; values are clamped/wrapped.                     |
 | `getView()`                       | Returns current `{ yaw, pitch, fov }` (degrees).                           |
 | `configure(partial)`              | Update options at runtime; constraints reapplied.                          |
@@ -63,7 +64,19 @@ interface PanoramaOptions {
   devicePixelRatio?: number; // default min(window.devicePixelRatio, 2)
   wheelModifierRequired?: boolean; // default true; if true, wheel zoom requires Ctrl/Cmd key
   fullscreenEnabled?: boolean; // default true; if true, shows fullscreen button when supported
+  tiles?: TileOptions; // tile-based loading configuration
   events?: PanoramaEvents;
+}
+
+interface TileOptions {
+  baseUrl: string; // URL template with {z}, {x}, {y} placeholders, e.g., "tiles/{z}/{x}/{y}.jpg"
+  minZoom?: number; // default 0
+  maxZoom?: number; // default 3
+  tileSize?: number; // default 512
+  cacheSize?: number; // default 64
+  preloadRadius?: number; // default 1
+  maxConcurrentRequests?: number; // default 6
+  adaptiveZoom?: boolean; // default true
 }
 
 interface PanoramaEvents {
@@ -79,10 +92,50 @@ interface PanoramaEvents {
   onResize?: (payload: { width: number; height: number; dpr: number }) => void;
   onLoad?: (payload: { image: HTMLImageElement; view: View }) => void;
   onError?: (payload: { error: Error; source: string | HTMLImageElement }) => void;
+  onTileLoadStart?: (payload: { tile: { z: number; x: number; y: number } }) => void;
+  onTileLoadProgress?: (payload: {
+    tile: { z: number; x: number; y: number };
+    progress: number;
+  }) => void;
+  onTileLoadComplete?: (payload: { tile: { z: number; x: number; y: number } }) => void;
+  onTileError?: (payload: { tile: { z: number; x: number; y: number }; error: Error }) => void;
 }
 ```
 
 Event callbacks are isolated from the render loop: thrown errors are caught and logged. `onRotate` is throttled during drag and is also emitted by `setView()` with zero deltas.
+
+## Tile-Based Loading
+
+For high-resolution panoramas, use tile-based loading to improve performance and reduce memory usage:
+
+```ts
+const player = new PanoramaPlayer({
+  container: document.getElementById('host'),
+  tiles: {
+    baseUrl: 'https://example.com/panorama/tiles/{z}/{x}/{y}.jpg',
+    tileSize: 512,
+    minZoom: 0,
+    maxZoom: 3,
+  },
+});
+
+// Or load tiles programmatically
+await player.loadTiles({
+  baseUrl: 'tiles/{z}/{x}/{y}.jpg',
+  tileSize: 512,
+  minZoom: 0,
+  maxZoom: 3,
+});
+```
+
+**Benefits:**
+
+- On-demand loading of visible tiles only
+- Reduced initial load time and memory usage
+- Support for extremely high-resolution panoramas
+- Automatic zoom level selection based on viewport
+
+**See [docs/TILE_LOADING.md](docs/TILE_LOADING.md) for detailed documentation.**
 
 ## Multiple instances
 
