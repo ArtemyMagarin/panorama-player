@@ -112,7 +112,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           skip_step: install
-          build_script: pnpm run build
+          build_script: build
 
   e2e:
     name: E2E Tests
