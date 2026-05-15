@@ -25,6 +25,7 @@ export class TileManager {
   private loadQueue: Tile[] = [];
   private loadQueueKeys = new Set<string>();
   private isProcessingQueue = false;
+  private isDisposed = false;
 
   // Event callbacks
   private onLoadStart?: () => void;
@@ -155,10 +156,14 @@ export class TileManager {
     const totalTiles = this.loadQueue.length;
     let loadedCount = 0;
 
-    while (this.loadQueue.length > 0) {
+    while (this.loadQueue.length > 0 && !this.isDisposed) {
       // Wait for available request slot
-      while (this.activeRequests >= this.config.maxConcurrentRequests) {
+      while (this.activeRequests >= this.config.maxConcurrentRequests && !this.isDisposed) {
         await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+
+      if (this.isDisposed) {
+        break;
       }
 
       const tile = this.loadQueue.shift()!;
@@ -191,8 +196,8 @@ export class TileManager {
         });
     }
 
-    // Wait for all active requests to complete
-    while (this.activeRequests > 0) {
+    // Wait for all active requests to complete (unless disposed)
+    while (this.activeRequests > 0 && !this.isDisposed) {
       await new Promise((resolve) => setTimeout(resolve, 100));
     }
 
@@ -307,6 +312,7 @@ export class TileManager {
    * Dispose of resources
    */
   dispose(): void {
+    this.isDisposed = true;
     this.cancelAll();
     this.cache.clear();
   }
