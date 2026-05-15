@@ -14,6 +14,10 @@ export class Renderer {
   readonly canvas: HTMLCanvasElement;
   private readonly gl: AnyGL;
   private readonly isWebGL2: boolean;
+
+  get glContext(): AnyGL {
+    return this.gl;
+  }
   private program: WebGLProgram | null = null;
   private positionVbo: WebGLBuffer | null = null;
   private uvVbo: WebGLBuffer | null = null;

@@ -17,6 +17,21 @@ export interface PanoramaEvents {
   onResize?: (payload: { width: number; height: number; dpr: number }) => void;
   onLoad?: (payload: { image: HTMLImageElement; view: View }) => void;
   onError?: (payload: { error: Error; source: string | HTMLImageElement }) => void;
+  onTileLoadStart?: () => void;
+  onTileLoadProgress?: (payload: { loaded: number; total: number; zoom: number }) => void;
+  onTileLoadComplete?: () => void;
+  onTileError?: (payload: { error: Error; tile: { z: number; x: number; y: number } }) => void;
+}
+
+export interface TileOptions {
+  baseUrl: string;
+  minZoom: number;
+  maxZoom: number;
+  tileSize: number;
+  cacheSize: number;
+  preloadRadius: number;
+  maxConcurrentRequests: number;
+  adaptiveZoom: boolean;
 }
 
 export interface PanoramaOptions {
@@ -30,6 +45,7 @@ export interface PanoramaOptions {
   wheelModifierRequired?: boolean;
   fullscreenEnabled?: boolean;
   events?: PanoramaEvents;
+  tiles?: TileOptions;
 }
 
 export interface ResolvedOptions {
@@ -42,6 +58,7 @@ export interface ResolvedOptions {
   devicePixelRatio: number;
   wheelModifierRequired: boolean;
   fullscreenEnabled: boolean;
+  tiles?: TileOptions;
 }
 
 export const DEFAULTS: ResolvedOptions = {
@@ -67,5 +84,6 @@ export function resolveOptions(opts?: PanoramaOptions): ResolvedOptions {
     devicePixelRatio: opts?.devicePixelRatio ?? DEFAULTS.devicePixelRatio,
     wheelModifierRequired: opts?.wheelModifierRequired ?? DEFAULTS.wheelModifierRequired,
     fullscreenEnabled: opts?.fullscreenEnabled ?? DEFAULTS.fullscreenEnabled,
+    tiles: opts?.tiles,
   };
 }

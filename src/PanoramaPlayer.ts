@@ -1,11 +1,13 @@
 import { PointerInput } from './input/PointerInput.js';
 import { WheelInput } from './input/WheelInput.js';
 import { Renderer } from './renderer/Renderer.js';
+import { TileRenderer } from './renderer/TileRenderer.js';
 import {
   type PanoramaOptions,
   type PanoramaEvents,
   type ResolvedOptions,
   type View,
+  type TileOptions,
   resolveOptions,
 } from './types.js';
 import { clamp, wrapDeg } from './utils/clamp.js';
@@ -18,6 +20,7 @@ import {
   isFullscreen,
   onFullscreenChange,
 } from './utils/fullscreen.js';
+import { TileManager } from './tiles/TileManager.js';
 
 const FULLSCREEN_ENTER_ICON = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
   <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
@@ -50,6 +53,12 @@ export class PanoramaPlayer {
   private readonly rotateThrottleDelay = 16;
   private pendingRotatePayload: { view: View; deltaX: number; deltaY: number } | null = null;
   private rotating = false;
+
+  // Tile mode properties
+  private tileManager: TileManager | null = null;
+  private tileRenderer: TileRenderer | null = null;
+  private tileMode = false;
+  private tileConfig: TileOptions | null = null;
 
   constructor(options?: PanoramaOptions) {
     this.options = resolveOptions(options);
@@ -135,6 +144,13 @@ export class PanoramaPlayer {
     this.dirty = true;
     this.scheduleFrame();
 
+    // Auto-load tiles if tiles option is provided
+    if (this.options.tiles) {
+      this.loadTiles(this.options.tiles).catch((error) => {
+        this.safeCall(this.events.onError, { error, source: 'tiles' });
+      });
+    }
+
     this.safeCall(this.events.onMount, { container, canvas: this.canvas });
   }
 
@@ -142,6 +158,12 @@ export class PanoramaPlayer {
     if (!this.renderer) {
       return Promise.reject(new Error('panorama-player: mount() before loadImage()'));
     }
+
+    // Dispose of tile mode if switching from tiles to single image
+    if (this.tileMode) {
+      this.disposeTileMode();
+    }
+
     const renderer = this.renderer;
     return loadImage(src)
       .then((img) => {
@@ -158,7 +180,89 @@ export class PanoramaPlayer {
       });
   }
 
+  loadTiles(config: TileOptions): Promise<void> {
+    if (!this.renderer) {
+      return Promise.reject(new Error('panorama-player: mount() before loadTiles()'));
+    }
+
+    // Dispose of single image mode if switching from single image to tiles
+    if (!this.tileMode) {
+      this.disposeSingleImageMode();
+    }
+
+    this.tileMode = true;
+    this.tileConfig = config;
+
+    // Initialize tile manager and renderer
+    const gl = this.renderer.glContext;
+    this.tileManager = new TileManager(gl, config, {
+      width: this.root?.clientWidth || 1,
+      height: this.root?.clientHeight || 1,
+      dpr: this.options.devicePixelRatio,
+      fov: this.view.fov,
+    });
+
+    this.tileRenderer = new TileRenderer(gl);
+    this.tileRenderer.initialize();
+    this.tileRenderer.updateGeometry(this.tileManager.getCurrentZoom());
+
+    // Set up event callbacks
+    this.tileManager.setEventCallbacks({
+      onLoadStart: () => this.safeCall(this.events.onTileLoadStart),
+      onLoadProgress: (progress) => this.safeCall(this.events.onTileLoadProgress, progress),
+      onLoadComplete: () => this.safeCall(this.events.onTileLoadComplete),
+      onError: (error) => this.safeCall(this.events.onTileError, error),
+    });
+
+    // Start loading tiles for current view
+    this.loadTilesForCurrentView();
+
+    return Promise.resolve();
+  }
+
+  private loadTilesForCurrentView(): void {
+    if (!this.tileManager) return;
+
+    // Convert view to UV coordinates
+    const viewU = (this.view.yaw + 180) / 360;
+    const viewV = (90 - this.view.pitch) / 180;
+
+    this.tileManager.loadTilesForView(viewU, viewV, this.view.fov);
+  }
+
+  private disposeTileMode(): void {
+    if (this.tileManager) {
+      this.tileManager.dispose();
+      this.tileManager = null;
+    }
+    if (this.tileRenderer) {
+      this.tileRenderer.dispose();
+      this.tileRenderer = null;
+    }
+    this.tileMode = false;
+    this.tileConfig = null;
+  }
+
+  private disposeSingleImageMode(): void {
+    // Single image mode doesn't need explicit cleanup
+    // The renderer will handle texture replacement
+  }
+
   configure(partial: Partial<PanoramaOptions>): void {
+    // Guard against mode switching
+    if (partial.tiles !== undefined) {
+      if (this.tileMode && !partial.tiles) {
+        throw new Error(
+          'panorama-player: cannot disable tile mode via configure(); recreate the player instance',
+        );
+      }
+      if (!this.tileMode && partial.tiles) {
+        throw new Error(
+          'panorama-player: cannot switch to tile mode via configure(); recreate the player instance',
+        );
+      }
+    }
+
     this.options = resolveOptions({ ...this.optionsAsInput(), ...partial });
     this.applyConstraints();
     this.dirty = true;
@@ -206,6 +310,10 @@ export class PanoramaPlayer {
     this.pointerInput = null;
     this.wheelInput?.dispose();
     this.wheelInput = null;
+
+    // Dispose of tile mode resources
+    this.disposeTileMode();
+
     this.renderer?.dispose();
     this.renderer = null;
     this.unsubscribeFullscreenChange?.();
